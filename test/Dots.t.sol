@@ -134,6 +134,65 @@ contract DotsTest is Test {
         assertEq(dots.mintStart(), uint64(block.timestamp + 1 days));
     }
 
+    // -------- Ownable2Step two-phase ownership transfer --------
+
+    /// @notice Starting an ownership transfer should NOT immediately change
+    ///         the owner — the new address has to accept it first.
+    function test_Ownership_TransferIsTwoStep() public {
+        vm.prank(owner);
+        dots.transferOwnership(alice);
+        // Current owner is unchanged until the new owner accepts.
+        assertEq(dots.owner(), owner, "owner unchanged before accept");
+        assertEq(dots.pendingOwner(), alice, "alice is pending owner");
+
+        // A non-accepting caller cannot claim the role.
+        vm.prank(bob);
+        vm.expectRevert();
+        dots.acceptOwnership();
+
+        // The pending owner accepts → role flips.
+        vm.prank(alice);
+        dots.acceptOwnership();
+        assertEq(dots.owner(), alice, "ownership transferred");
+        assertEq(dots.pendingOwner(), address(0), "pending slot cleared");
+    }
+
+    /// @notice Only the current owner can initiate a transfer.
+    function test_Ownership_TransferRevertsForNonOwner() public {
+        vm.prank(alice);
+        vm.expectRevert();
+        dots.transferOwnership(alice);
+    }
+
+    /// @notice After a pending transfer the original owner can still call
+    ///         owner-only functions — the role doesn't flip until accept.
+    function test_Ownership_OldOwnerKeepsPrivilegeUntilAccept() public {
+        vm.prank(owner);
+        dots.transferOwnership(alice);
+        // Old owner can still set mint price.
+        vm.prank(owner);
+        dots.setMintPrice(0.05 ether);
+        assertEq(dots.mintPrice(), 0.05 ether);
+        // New pending owner CANNOT yet.
+        vm.prank(alice);
+        vm.expectRevert();
+        dots.setMintPrice(1 ether);
+    }
+
+    // -------- Withdraw failure path --------
+
+    /// @notice If the recipient's fallback reverts, withdraw() should surface
+    ///         the custom WithdrawFailed error instead of silently dropping.
+    function test_Withdraw_RevertsWhenRecipientRejects() public {
+        vm.prank(alice);
+        dots.mint{value: PRICE}(1);
+
+        RejectingReceiver bad = new RejectingReceiver();
+        vm.prank(owner);
+        vm.expectRevert(IDots.WithdrawFailed.selector);
+        dots.withdraw(payable(address(bad)));
+    }
+
     // -------- Circulation counter --------
 
     function test_Circulation_InitialZero() public view {
@@ -335,4 +394,12 @@ contract DotsTest is Test {
         assertEq(c[7], 0);
         assertEq(dots.totalSupply(), 1);
     }
+}
+
+/// @notice Helper contract whose receive()/fallback reverts every time —
+///         used to exercise the WithdrawFailed revert path in Dots.withdraw().
+contract RejectingReceiver {
+    error Nope();
+    receive() external payable { revert Nope(); }
+    fallback() external payable { revert Nope(); }
 }

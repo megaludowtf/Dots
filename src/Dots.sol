@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -17,7 +18,7 @@ import {DotsMetadata} from "./DotsMetadata.sol";
 ///         from a random seed so every token is visually distinct for marketplaces.
 ///         Mechanics: merge 2 -> 1 six times to reach a single dot;
 ///                    infinity() collapses 64 single dots into one Mega Dot.
-contract Dots is ERC721, ERC2981, Ownable, IDots {
+contract Dots is ERC721, ERC2981, Ownable2Step, IDots {
     mapping(uint256 => Dot) internal _dots;
 
     uint256 public nextTokenId = 1;
