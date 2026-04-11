@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>OpenSea asset rasterizer</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #000; }
+  .frame { display: block; }
+  #logo     { width: 1000px; height: 1000px; }
+  #banner   { width: 1400px; height: 400px; }
+  #featured { width: 600px; height: 400px; }
+</style>
+</head>
+<body>
+<!--
+  One frame shown at a time via #hash routing. The Chrome MCP screenshot tool
+  captures the visible viewport, so we resize the viewport to match each asset.
+  Usage: navigate to rasterize.html#logo / #banner / #featured
+-->
+<img id="logo"     class="frame" src="./logo.svg"     alt="" style="display:none"/>
+<img id="banner"   class="frame" src="./banner.svg"   alt="" style="display:none"/>
+<img id="featured" class="frame" src="./featured.svg" alt="" style="display:none"/>
+
+<script>
+function showFromHash() {
+  const id = (location.hash || "#logo").slice(1);
+  for (const el of document.querySelectorAll(".frame")) {
+    el.style.display = el.id === id ? "block" : "none";
+  }
+}
+showFromHash();
+window.addEventListener("hashchange", showFromHash);
+</script>
+</body>
+</html>

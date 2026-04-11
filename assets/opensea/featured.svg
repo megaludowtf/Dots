@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <defs>
+    <symbol id="m" viewBox="0 0 105 105">
+      <path d="M62.7534 81.6321C65.9781 81.6321 68.5825 79.0297 68.5825 75.8195C68.5825 72.6093 65.9781 70.0068 62.7534 70.0068C59.5536 70.0068 56.9492 72.6093 56.9492 75.8195C56.9492 79.0297 59.5536 81.6321 62.7534 81.6321Z" fill="#19191A"/>
+      <path d="M41.8648 81.805C45.0894 81.805 47.6693 79.2026 47.6693 75.9923C47.6693 72.7821 45.0894 70.1797 41.8648 70.1797C38.665 70.1797 36.0605 72.7821 36.0605 75.9923C36.0605 79.2026 38.665 81.805 41.8648 81.805Z" fill="#19191A"/>
+      <path d="M29.1376 21.0791H42.9855C45.5913 28.1286 52.3911 48.1021 52.8874 49.215C53.0115 48.6586 59.8608 26.8919 61.7966 21.2028H76.1904V70.8582C74.4036 69.8687 72.6166 68.8795 70.6809 67.7662C69.3407 67.0863 68.1 66.344 66.7351 65.7875C66.611 56.1409 66.487 46.5561 66.1892 36.5385C64.2535 42.2894 57.5776 62.5721 57.0316 63.1286H48.1225C48.1225 63.1286 39.4613 38.5172 39.0394 37.4042C38.9154 46.8653 38.7913 56.3264 38.4687 66.0968C33.1579 68.8175 30.0063 70.3635 29.0137 70.7344V21.0791H29.1376Z" fill="#19191A"/>
+    </symbol>
+  </defs>
+
+  <!-- Canvas -->
+  <rect width="600" height="400" fill="#0a0a14"/>
+
+  <!-- Subtle grid backdrop -->
+  <g stroke="#1e1e2a" stroke-width="1" fill="none">
+    <path d="M50 50V350 M170 50V350 M290 50V350 M410 50V350 M530 50V350"/>
+    <path d="M50 50H530 M50 200H530 M50 350H530"/>
+  </g>
+
+  <!-- Title block -->
+  <text x="50" y="100" font-family="Inter, system-ui, sans-serif" font-size="42" font-weight="400" letter-spacing="-1" fill="#ffffff">DOTS</text>
+  <text x="50" y="128" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12" letter-spacing="2" fill="#8b8b93">ONCHAIN EDITION ON MEGAETH</text>
+
+  <!-- 4 tokens showing a sample of the colour range -->
+  <g transform="translate(60, 180)">
+    <circle cx="60" cy="60" r="60" fill="#E84AA9"/>
+    <use href="#m" x="0" y="0" width="120" height="120"/>
+
+    <circle cx="180" cy="60" r="60" fill="#F9A45C"/>
+    <use href="#m" x="120" y="0" width="120" height="120"/>
+
+    <circle cx="300" cy="60" r="60" fill="#63C23C"/>
+    <use href="#m" x="240" y="0" width="120" height="120"/>
+
+    <circle cx="420" cy="60" r="60" fill="#60B1F4"/>
+    <use href="#m" x="360" y="0" width="120" height="120"/>
+  </g>
+</svg>

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dots — Onchain edition on MegaETH</title>
+<meta name="description" content="Onchain generative NFT on MegaETH. Merge dots down from 80 to a single dot, then burn 64 into one Mega Dot.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<!-- ============================== NAV ============================== -->
+<nav class="top">
+  <div class="inner">
+    <a href="#intro" class="brand" title="Dots — 1 → 2 → 4 → 2 → 1">
+      <span class="split" aria-hidden="true">
+        <span class="dot d1"></span>
+        <span class="dot d2"></span>
+        <span class="dot d3"></span>
+        <span class="dot d4"></span>
+      </span>
+    </a>
+    <div class="pills">
+      <a href="#intro">Intro</a>
+      <a href="#stats">Stats</a>
+      <a href="#mint">Mint</a>
+      <a href="#timeline">Timeline</a>
+      <a href="#faq">FAQ</a>
+      <a href="#explore">Explore</a>
+      <a href="#profile" class="connected-only">Profile</a>
+      <a href="#merge" class="connected-only">Merge</a>
+      <a href="#infinity" class="connected-only">Mega Dot</a>
+      <button id="connect-btn" class="connect-btn">Connect</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================== INTRO ============================== -->
+<section id="intro">
+  <div class="container">
+    <div class="copy">
+      <div class="wordmark">
+        <span>Dots</span>
+        <span class="accent-dot pink"></span>
+        <span class="accent-dot blue"></span>
+        <span class="accent-dot green"></span>
+      </div>
+      <h1>An onchain edition on MegaETH.</h1>
+      <div class="links">
+        <a href="#mint" class="primary">Mint &rarr;</a>
+      </div>
+    </div>
+    <div id="hero-art" class="art-cage" title="click to reroll"></div>
+  </div>
+  <div class="scroll-hint"></div>
+</section>
+
+<!-- ============================== STATS ============================== -->
+<section id="stats">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">01 &mdash; Stats</span>
+      <h2>Live numbers from the contract.</h2>
+      <p class="body">Read directly from MegaETH. Updates whenever someone mints, merges, or burns.</p>
+    </div>
+    <div class="circulation">
+      <div class="circulation-head">
+        <span class="label">Circulation by level</span>
+        <span class="sub" id="circulation-total">—</span>
+      </div>
+      <div class="circulation-grid" id="circulation-grid">
+        <div class="circ-cell" data-divisor="0"><div class="glyphs">80</div><div class="count" id="circ-0">—</div><div class="hint">dots</div></div>
+        <div class="circ-cell" data-divisor="1"><div class="glyphs">40</div><div class="count" id="circ-1">—</div><div class="hint">dots</div></div>
+        <div class="circ-cell" data-divisor="2"><div class="glyphs">20</div><div class="count" id="circ-2">—</div><div class="hint">dots</div></div>
+        <div class="circ-cell" data-divisor="3"><div class="glyphs">10</div><div class="count" id="circ-3">—</div><div class="hint">dots</div></div>
+        <div class="circ-cell" data-divisor="4"><div class="glyphs">5</div><div class="count" id="circ-4">—</div><div class="hint">dots</div></div>
+        <div class="circ-cell" data-divisor="5"><div class="glyphs">4</div><div class="count" id="circ-5">—</div><div class="hint">dots</div></div>
+        <div class="circ-cell" data-divisor="6"><div class="glyphs">1</div><div class="count" id="circ-6">—</div><div class="hint">dot</div></div>
+        <div class="circ-cell mega" data-divisor="7"><div class="glyphs"><svg class="megadot-icon" viewBox="0 0 105 105" xmlns="http://www.w3.org/2000/svg" aria-label="Mega Dot"><circle cx="52.5" cy="52.5" r="50" fill="#DFD9D9"/><path d="M62.7534 81.6321C65.9781 81.6321 68.5825 79.0297 68.5825 75.8195C68.5825 72.6093 65.9781 70.0068 62.7534 70.0068C59.5536 70.0068 56.9492 72.6093 56.9492 75.8195C56.9492 79.0297 59.5536 81.6321 62.7534 81.6321Z" fill="#19191A"/><path d="M41.8648 81.805C45.0894 81.805 47.6693 79.2026 47.6693 75.9923C47.6693 72.7821 45.0894 70.1797 41.8648 70.1797C38.665 70.1797 36.0605 72.7821 36.0605 75.9923C36.0605 79.2026 38.665 81.805 41.8648 81.805Z" fill="#19191A"/><path d="M29.1376 21.0791H42.9855C45.5913 28.1286 52.3911 48.1021 52.8874 49.215C53.0115 48.6586 59.8608 26.8919 61.7966 21.2028H76.1904V70.8582C74.4036 69.8687 72.6166 68.8795 70.6809 67.7662C69.3407 67.0863 68.1 66.344 66.7351 65.7875C66.611 56.1409 66.487 46.5561 66.1892 36.5385C64.2535 42.2894 57.5776 62.5721 57.0316 63.1286H48.1225C48.1225 63.1286 39.4613 38.5172 39.0394 37.4042C38.9154 46.8653 38.7913 56.3264 38.4687 66.0968C33.1579 68.8175 30.0063 70.3635 29.0137 70.7344V21.0791H29.1376Z" fill="#19191A"/></svg></div><div class="count" id="circ-7">—</div><div class="hint">mega dot</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== MINT ============================== -->
+<section id="mint">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">02 &mdash; Mint</span>
+      <h2>Get a dot.</h2>
+      <p class="body">Every mint is a fresh grid of 80 dots with a random seed. Colors are drawn from a curated 80-shade pink-through-purple gradient.</p>
+    </div>
+    <div class="panel">
+      <div id="mint-preview" class="preview"></div>
+      <div class="details">
+        <div class="row">
+          <label>Price</label>
+          <span id="mint-stat-price" class="value">—</span>
+        </div>
+        <div class="row">
+          <label>Total minted</label>
+          <span id="mint-stat-total" class="value">—</span>
+        </div>
+        <div class="row">
+          <label>Status</label>
+          <span id="mint-stat-status" class="value">—</span>
+        </div>
+        <div class="row">
+          <label>You pay</label>
+          <span id="mint-stat-total-cost" class="value">—</span>
+        </div>
+        <div class="amount-row">
+          <label>Amount</label>
+          <div class="amount-group">
+            <button id="amount-dec" aria-label="decrease">−</button>
+            <input id="amount-count" class="count" type="number" min="1" max="50" step="1" value="1" inputmode="numeric" />
+            <button id="amount-inc" aria-label="increase">+</button>
+          </div>
+        </div>
+        <button id="mint-btn" class="mint-btn" disabled>Mint</button>
+        <div id="mint-status" class="status"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== TIMELINE ============================== -->
+<section id="timeline">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">03 &mdash; Timeline</span>
+      <h2>Onchain activity.</h2>
+      <p class="body">Live event feed — mints, merges, infinity burns and transfers pulled straight from the contract.</p>
+    </div>
+    <div class="timeline-toolbar">
+      <div class="timeline-count" id="timeline-count">loading…</div>
+      <div class="timeline-filter">
+        <button data-filter="all"     class="active">All</button>
+        <button data-filter="mint">Mint</button>
+        <button data-filter="merge">Merge</button>
+        <button data-filter="infinity">Infinity</button>
+        <button data-filter="burn">Burn</button>
+      </div>
+    </div>
+    <ol class="timeline-feed" id="timeline-feed">
+      <li class="tl-empty">Connect to a deployed contract to stream events.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================== FAQ ============================== -->
+<section id="faq">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">04 &mdash; FAQ</span>
+      <h2>Questions you probably have.</h2>
+    </div>
+    <div class="items">
+      <div class="item">
+        <div class="q">What is Dots?</div>
+        <div class="a">Dots is an open edition of generative tokens. Every mint is an 8&times;10 grid of 80 coloured MegaETH logomarks at a unique seed.</div>
+      </div>
+      <div class="item">
+        <div class="q">How does merging work?</div>
+        <div class="a">Merge two dots of the same level to burn one and halve the dots on the other. The ladder runs 80 &rarr; 40 &rarr; 20 &rarr; 10 &rarr; 5 &rarr; 4 &rarr; 1.</div>
+      </div>
+      <div class="item">
+        <div class="q">Where is the art stored?</div>
+        <div class="a">Fully onchain. <code>tokenURI</code> returns a base64-encoded JSON document containing a base64-encoded SVG. No IPFS, no HTTP, no mutable metadata. The contract renders the full image on demand for every view call.</div>
+      </div>
+      <div class="item">
+        <div class="q">Do colors change when I merge?</div>
+        <div class="a">The seed stays stable. Colours are derived from the seed plus the merges history, so a merged dot inherits traces of every ancestor. The palette itself is 80 hand-picked hex values sorted as a smooth pink-through-purple gradient.</div>
+      </div>
+      <div class="item">
+        <div class="q">What is the Mega Dot?</div>
+        <div class="a">The terminal state at level 7. Reached only by burning 64 single dots in one call via <code>infinity()</code>. Rendered as a single white MegaETH logomark on a black disc, on a white canvas &mdash; the one inverted state in the collection.</div>
+      </div>
+      <div class="item">
+        <div class="q">What gas does merge cost?</div>
+        <div class="a">A single merge runs around 120k gas &mdash; two storage reads, one storage write, one burn. A full 80 &rarr; 1 ladder across 63 merges is well within a single testnet transaction budget.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== EXPLORE ============================== -->
+<section id="explore">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">05 &mdash; Explore</span>
+      <h2>Every dot, onchain.</h2>
+      <p class="body">Pulled live from the contract. Each token's SVG is decoded from the base64 <code>tokenURI</code> and rendered inline.</p>
+    </div>
+    <div class="toolbar">
+      <div class="count" id="explore-count">—</div>
+      <div class="filters">
+        <label class="filter-group">
+          <span class="label">Dots</span>
+          <select id="filter-glyphs">
+            <option value="all">All</option>
+            <option value="80">80</option>
+            <option value="40">40</option>
+            <option value="20">20</option>
+            <option value="10">10</option>
+            <option value="5">5</option>
+            <option value="4">4</option>
+            <option value="1">1</option>
+          </select>
+        </label>
+        <label class="filter-group">
+          <span class="label">Gradient</span>
+          <select id="filter-gradient">
+            <option value="all">All</option>
+            <option value="0">None</option>
+            <option value="1">Linear</option>
+            <option value="2">Reflected</option>
+            <option value="3">Angled</option>
+            <option value="4">Double Angled</option>
+            <option value="5">Linear Double</option>
+            <option value="6">Linear Z</option>
+          </select>
+        </label>
+        <label class="filter-group">
+          <span class="label">Color band</span>
+          <select id="filter-band">
+            <option value="all">All</option>
+            <option value="0">Eighty</option>
+            <option value="1">Sixty</option>
+            <option value="2">Forty</option>
+            <option value="3">Twenty</option>
+            <option value="4">Ten</option>
+            <option value="5">Five</option>
+            <option value="6">One</option>
+          </select>
+        </label>
+        <label class="filter-group">
+          <span class="label">Sort</span>
+          <select id="filter-sort">
+            <option value="latest">Latest</option>
+            <option value="number">#Number</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <div id="explore-gallery" class="gallery"></div>
+  </div>
+</section>
+
+<!-- ============================== MERGE ============================== -->
+<section id="merge">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">06 &mdash; Merge</span>
+      <h2>Burn two, advance one.</h2>
+      <p class="body">Pick two tokens you own at the same level. The first slot survives; the second is burned. Advance one step down the ladder.</p>
+    </div>
+    <div class="workspace">
+      <div id="slot-survivor" class="slot" data-slot="survivor">
+        <div class="placeholder">Click to pick<br>survivor</div>
+      </div>
+      <div class="op">+</div>
+      <div id="slot-burn" class="slot" data-slot="burn">
+        <div class="placeholder">Click to pick<br>burn token</div>
+      </div>
+      <div class="op">=</div>
+      <div id="slot-result" class="slot">
+        <div class="placeholder">Merged<br>result preview</div>
+      </div>
+    </div>
+    <div class="controls">
+      <label class="swap-row">
+        <input type="checkbox" id="merge-swap">
+        <span>Copy the 2nd token's visual DNA onto the child</span>
+      </label>
+      <button id="merge-btn" class="merge-btn" disabled>Merge &rarr;</button>
+    </div>
+    <div id="merge-status" class="status"></div>
+  </div>
+</section>
+
+<!-- ============================== PROFILE ============================== -->
+<section id="profile">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">07 &mdash; Profile</span>
+      <h2>Your Dots.</h2>
+      <p class="body">Every token your connected wallet currently holds — read straight from Transfer logs, no indexer.</p>
+    </div>
+    <div class="profile-toolbar">
+      <div class="profile-addr" id="profile-addr">Not connected</div>
+      <div class="profile-stats" id="profile-stats">—</div>
+    </div>
+    <div class="profile-filters">
+      <label class="filter-group">
+        <span class="label">Dots</span>
+        <select id="profile-filter-glyphs">
+          <option value="all">All</option>
+          <option value="80">80</option>
+          <option value="40">40</option>
+          <option value="20">20</option>
+          <option value="10">10</option>
+          <option value="5">5</option>
+          <option value="4">4</option>
+          <option value="1">1</option>
+        </select>
+      </label>
+      <label class="filter-group">
+        <span class="label">Gradient</span>
+        <select id="profile-filter-gradient">
+          <option value="all">All</option>
+          <option value="0">None</option>
+          <option value="1">Linear</option>
+          <option value="2">Reflected</option>
+          <option value="3">Angled</option>
+          <option value="4">Double Angled</option>
+          <option value="5">Linear Double</option>
+          <option value="6">Linear Z</option>
+        </select>
+      </label>
+      <label class="filter-group">
+        <span class="label">Color band</span>
+        <select id="profile-filter-band">
+          <option value="all">All</option>
+          <option value="0">Eighty</option>
+          <option value="1">Sixty</option>
+          <option value="2">Forty</option>
+          <option value="3">Twenty</option>
+          <option value="4">Ten</option>
+          <option value="5">Five</option>
+          <option value="6">One</option>
+        </select>
+      </label>
+    </div>
+    <div class="profile-grid" id="profile-grid">
+      <div class="profile-empty">Connect your wallet to load your tokens.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== INFINITY ============================== -->
+<section id="infinity">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">07 &mdash; Mega Dot</span>
+      <h2>Forge the Mega Dot.</h2>
+      <p class="body">Collapse 64 single dots into one terminal Mega Dot. The keeper advances to level 7 and the other 63 burn. There is no step beyond this.</p>
+    </div>
+    <div class="infinity-panel">
+      <div class="infinity-meter">
+        <div class="meter-head">
+          <span class="label">Your single dots</span>
+          <span class="count" id="infinity-count">—</span>
+          <span class="sub">/ 64 required</span>
+        </div>
+        <div class="meter-bar">
+          <div class="meter-fill" id="infinity-fill"></div>
+        </div>
+      </div>
+      <div class="infinity-picker">
+        <p class="hint" id="infinity-hint">Connect your wallet to see your tokens.</p>
+        <div class="infinity-grid" id="infinity-grid"></div>
+      </div>
+      <div class="infinity-cta">
+        <button id="infinity-btn" class="mint-btn" disabled>Burn 64 &rarr; Mega Dot</button>
+        <div id="infinity-status" class="status"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FEED ============================== -->
+<section id="feed">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">07 &mdash; Feed</span>
+      <h2>Recent activity.</h2>
+      <p class="body">Onchain events from the contract. Mints, merges, burns, and the terminal infinity call.</p>
+    </div>
+    <div id="feed-list" class="list">
+      <div class="empty">Feed will populate once the contract is deployed.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FOOTER ============================== -->
+<footer>
+  <div class="inner">
+    <div>
+      <div>Dots &mdash; MegaETH testnet</div>
+      <div class="contract" id="footer-contract">Contract: not deployed</div>
+    </div>
+    <div class="links">
+      <a href="https://testnet.megaeth.com/" target="_blank" rel="noopener">Faucet</a>
+      <a href="https://megaeth-testnet-v2.blockscout.com/" target="_blank" rel="noopener">Explorer</a>
+      <a href="https://docs.megaeth.com/" target="_blank" rel="noopener">Docs</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================== LINEAGE MODAL ============================== -->
+<div id="lineage-modal" class="lineage-modal" hidden>
+  <div class="lineage-backdrop" data-close="1"></div>
+  <div class="lineage-dialog" role="dialog" aria-modal="true" aria-labelledby="lineage-dialog-title">
+    <div class="lineage-head">
+      <div>
+        <div class="lineage-eyebrow">Merge tree</div>
+        <div class="lineage-title" id="lineage-dialog-title">Lineage</div>
+      </div>
+      <div class="lineage-head-actions">
+        <div class="lineage-zoom" role="group" aria-label="Zoom controls">
+          <button id="lineage-zoom-out" class="lineage-zoom-btn" aria-label="Zoom out">−</button>
+          <span id="lineage-zoom-level" class="lineage-zoom-level">100%</span>
+          <button id="lineage-zoom-in" class="lineage-zoom-btn" aria-label="Zoom in">+</button>
+          <button id="lineage-zoom-reset" class="lineage-zoom-reset" aria-label="Reset zoom">Reset</button>
+        </div>
+        <button class="lineage-close" data-close="1" aria-label="Close">&times;</button>
+      </div>
+    </div>
+    <div class="lineage-toolbar">
+      <div class="lineage-breadcrumb" id="lineage-breadcrumb"></div>
+      <div class="lineage-stats" id="lineage-stats">—</div>
+    </div>
+    <div class="lineage-viewport" id="lineage-viewport">
+      <div class="lineage-empty">Loading lineage…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== TOKEN PICKER MODAL ============================== -->
+<div id="picker-modal" class="picker-modal" hidden>
+  <div class="picker-backdrop" data-close="1"></div>
+  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
+    <div class="picker-head">
+      <div>
+        <div class="picker-eyebrow" id="picker-eyebrow">Pick a token</div>
+        <div class="picker-title" id="picker-title">Your wallet</div>
+      </div>
+      <button class="picker-close" data-close="1" aria-label="Close">&times;</button>
+    </div>
+    <div class="picker-hint" id="picker-hint"></div>
+    <div class="picker-grid" id="picker-grid"></div>
+  </div>
+</div>
+
+<script type="module" src="./app.js"></script>
+<script type="module">
+  import { CONTRACT_ADDRESS } from "./config.js";
+  const el = document.getElementById("footer-contract");
+  if (CONTRACT_ADDRESS !== "0x0000000000000000000000000000000000000000") {
+    el.textContent = `Contract: ${CONTRACT_ADDRESS}`;
+  }
+</script>
+</body>
+</html>
