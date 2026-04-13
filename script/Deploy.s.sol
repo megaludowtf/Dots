@@ -21,7 +21,7 @@ contract Deploy is Script {
         uint256 pk = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(pk);
 
-        uint256 mintPrice = _envOr("MINT_PRICE_WEI", 0.001 ether);
+        uint256 mintPrice = _envOr("MINT_PRICE_WEI", 0.0001 ether);
         uint64 mintStart = uint64(_envOr("MINT_START", block.timestamp));
         uint64 mintEnd = uint64(_envOr("MINT_END", block.timestamp + 7 days));
 

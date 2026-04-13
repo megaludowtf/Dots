@@ -8,3 +8,4 @@ node_modules/
 .claude/
 .DS_Store
 Thumbs.db
+web/dist/
