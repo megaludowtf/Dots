@@ -1,12 +1,10 @@
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { http } from 'wagmi';
+import { createConfig, http } from 'wagmi';
+import { injected } from 'wagmi/connectors';
 import { ACTIVE_CHAIN } from './chains';
 
-export const wagmiConfig = getDefaultConfig({
-  appName: 'Dots',
-  // WalletConnect project ID — get one at https://cloud.walletconnect.com
-  // For local dev this can be any non-empty string.
-  projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'dots-dev-local',
+// MetaMask-only via the injected connector (window.ethereum).
+export const wagmiConfig = createConfig({
+  connectors: [injected()],
   chains: [ACTIVE_CHAIN],
   transports: {
     [ACTIVE_CHAIN.id]: http(ACTIVE_CHAIN.rpcUrls.default.http[0]),

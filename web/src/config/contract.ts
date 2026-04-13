@@ -1,5 +1,5 @@
 // Contract address — paste the deployed address here.
-export const CONTRACT_ADDRESS: `0x${string}` = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+export const CONTRACT_ADDRESS: `0x${string}` = '0x478558FBD4d89fE2aEC886595B7bD02308eBE23D';
 
 export const hasContract =
   CONTRACT_ADDRESS !== '0x0000000000000000000000000000000000000000';

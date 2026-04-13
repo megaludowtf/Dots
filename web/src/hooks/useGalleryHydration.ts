@@ -46,7 +46,7 @@ export function useGalleryHydration(tokens: LiveToken[]): HydratedToken[] {
               if (attr.trait_type === 'Color Band' && cbIdx !== -1) colorBandIdx = cbIdx;
               const gIdx = GRADIENT_LABELS.indexOf(attr.value);
               if (attr.trait_type === 'Gradient' && gIdx !== -1) gradientIdx = gIdx;
-              if (attr.trait_type === 'Direction') direction = Number(attr.value);
+              if (attr.trait_type === 'Direction') direction = attr.value === 'Reverse' ? 1 : 0;
               if (attr.trait_type === 'Speed') speed = Number(attr.value);
             }
           }

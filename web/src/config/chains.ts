@@ -1,7 +1,7 @@
 import { defineChain } from 'viem';
 
 export const megaethTestnet = defineChain({
-  id: 6342,
+  id: 6343,
   name: 'MegaETH Testnet',
   nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
   rpcUrls: {
@@ -40,4 +40,4 @@ export const anvilLocal = defineChain({
 });
 
 // Flip this single line when moving between environments.
-export const ACTIVE_CHAIN = anvilLocal;
+export const ACTIVE_CHAIN = megaethTestnet;

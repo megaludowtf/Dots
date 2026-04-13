@@ -59,6 +59,11 @@ contract Dots is ERC721, ERC2981, Ownable2Step, IDots {
     function mint(uint256 amount) external payable {
         if (block.timestamp < mintStart || block.timestamp >= mintEnd) revert MintClosed();
         if (amount == 0 || amount > MAX_MINT_PER_TX) revert InvalidTokenCount();
+        // Safe multiplication: amount is capped at 50 so overflow is impossible
+        // in practice, but we guard explicitly in case mintPrice is set absurdly.
+        unchecked {
+            if (mintPrice != 0 && amount > type(uint256).max / mintPrice) revert Underpaid();
+        }
         if (msg.value < mintPrice * amount) revert Underpaid();
 
         uint256 firstId = nextTokenId;
@@ -96,7 +101,7 @@ contract Dots is ERC721, ERC2981, Ownable2Step, IDots {
     }
 
     function mergeMany(uint256[] calldata survivors, uint256[] calldata burns) external {
-        if (survivors.length != burns.length) revert ArrayLengthMismatch();
+        if (survivors.length == 0 || survivors.length != burns.length) revert ArrayLengthMismatch();
         for (uint256 i; i < survivors.length; ++i) {
             _merge(survivors[i], burns[i], false);
         }
@@ -306,6 +311,7 @@ contract Dots is ERC721, ERC2981, Ownable2Step, IDots {
     // -----------------------------------------------------------------------
 
     function setMintWindow(uint64 _mintStart, uint64 _mintEnd) external onlyOwner {
+        if (_mintStart >= _mintEnd) revert MintClosed();
         mintStart = _mintStart;
         mintEnd = _mintEnd;
     }

@@ -99,7 +99,7 @@ export function useOwnedTokens(): UseOwnedTokensResult {
                     if (attr.trait_type === 'Color Band' && idx !== -1) colorBandIdx = idx;
                     const gIdx = GRADIENT_LABELS.indexOf(attr.value);
                     if (attr.trait_type === 'Gradient' && gIdx !== -1) gradientIdx = gIdx;
-                    if (attr.trait_type === 'Direction') direction = Number(attr.value);
+                    if (attr.trait_type === 'Direction') direction = attr.value === 'Reverse' ? 1 : 0;
                     if (attr.trait_type === 'Speed') speed = Number(attr.value);
                   }
                 }

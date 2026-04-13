@@ -2,10 +2,10 @@
 // Paste your deployed address below and flip ACTIVE_CHAIN between the two
 // exports depending on whether you are pointing the frontend at testnet or
 // mainnet. Viem reads whatever ACTIVE_CHAIN resolves to at import time.
-export const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+export const CONTRACT_ADDRESS = "0x478558FBD4d89fE2aEC886595B7bD02308eBE23D";
 
 export const MEGAETH_TESTNET = {
-  id: 6342,
+  id: 6343,
   name: "MegaETH Testnet",
   nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   rpcUrls: {
@@ -55,7 +55,7 @@ export const ANVIL_LOCAL = {
 // moving between environments — no other frontend code needs to change.
 // Local dev default: ANVIL_LOCAL. Flip to MEGAETH_TESTNET/MEGAETH_MAINNET
 // before deploying to a public chain.
-export const ACTIVE_CHAIN = ANVIL_LOCAL;
+export const ACTIVE_CHAIN = MEGAETH_TESTNET;
 
 // Minimal ABI — only the functions the frontend needs.
 export const ABI = [
