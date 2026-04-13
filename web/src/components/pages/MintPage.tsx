@@ -21,7 +21,7 @@ function mintStatusLabel(mintStart: bigint | undefined, mintEnd: bigint | undefi
 
 export function MintPage() {
   const { isConnected } = useAccount();
-  const { mintPrice, totalSupply, mintStart, mintEnd, isLoading } = useContractStats();
+  const { mintPrice, nextTokenId, mintStart, mintEnd, isLoading } = useContractStats();
   const { mint, status, error, txHash } = useMintAction();
 
   const [amount, setAmount] = useState(1);
@@ -77,11 +77,11 @@ export function MintPage() {
             </div>
 
             <div className="row">
-              <label>Total Supply</label>
+              <label>Total Minted</label>
               <span className="value">
-                {isLoading || totalSupply === undefined
+                {isLoading || nextTokenId === undefined
                   ? '...'
-                  : String(Number(totalSupply))}
+                  : String(Number(nextTokenId) - 1)}
               </span>
             </div>
 

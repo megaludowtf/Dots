@@ -1,11 +1,9 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveTokens } from '@/hooks/useLiveTokens';
-import { useGalleryHydration } from '@/hooks/useGalleryHydration';
 import { useMerge } from '@/contexts/MergeContext';
 import { ScrollSentinel } from '@/components/shared/ScrollSentinel';
-// @ts-ignore
-import { glyphCount } from '@/art/art';
+import { glyphCount, renderSVG } from '@/art/art';
 
 const PAGE_SIZE = 30;
 
@@ -20,38 +18,33 @@ const DOTS_OPTIONS = [
   { label: '1', value: '1' },
 ];
 
+const GRADIENT_LABELS = ['None', 'Linear', 'Reflected', 'Angled', 'Double Angled', 'Linear Double', 'Linear Z'];
+const COLOR_BAND_LABELS = ['Eighty', 'Sixty', 'Forty', 'Twenty', 'Ten', 'Five', 'One'];
+
 const GRADIENT_OPTIONS = [
   { label: 'All', value: 'all' },
-  { label: 'None', value: '0' },
-  { label: 'Linear', value: '1' },
-  { label: 'Radial', value: '2' },
-  { label: 'Conic', value: '5' },
-  { label: 'Stripe', value: '8' },
-  { label: 'Checker', value: '9' },
-  { label: 'Diamond', value: '10' },
+  ...GRADIENT_LABELS.map((l, i) => ({ label: l, value: String(i) })),
 ];
 
 const COLOR_BAND_OPTIONS = [
   { label: 'All', value: 'all' },
-  { label: 'Eighty', value: '80' },
-  { label: 'Sixty', value: '60' },
-  { label: 'Forty', value: '40' },
-  { label: 'Twenty', value: '20' },
-  { label: 'Ten', value: '10' },
-  { label: 'Five', value: '5' },
-  { label: 'One', value: '1' },
+  ...COLOR_BAND_LABELS.map((l, i) => ({ label: l, value: String(i) })),
 ];
 
 const SORT_OPTIONS = [
   { label: 'Latest', value: 'latest' },
-  { label: '#Number', value: 'number' },
+  { label: 'Oldest', value: 'oldest' },
+  { label: 'Level ↑', value: 'level-asc' },
+  { label: 'Level ↓', value: 'level-desc' },
 ];
 
 const GLYPH_TO_DIVISOR: Record<number, number> = { 80: 0, 40: 1, 20: 2, 10: 3, 5: 4, 4: 5, 1: 6 };
 
 export function ExplorePage() {
   const { tokens: liveTokens, isLoading } = useLiveTokens();
-  const hydrated = useGalleryHydration(liveTokens);
+  // Render SVGs client-side from seed + divisorIndex — instant, no RPC calls.
+  // Colors may differ slightly from canonical tokenURI (different hash function)
+  // but avoids the per-token RPC bottleneck that makes the gallery slow.
   const { setSurvivor } = useMerge();
   const navigate = useNavigate();
 
@@ -61,8 +54,7 @@ export function ExplorePage() {
   const [sortBy, setSortBy] = useState('latest');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  // Use hydrated tokens (with SVGs) when available, fall back to live tokens.
-  const tokens = hydrated.length > 0 ? hydrated : liveTokens;
+  const tokens = liveTokens;
 
   const filtered = useMemo(() => {
     let list = [...tokens];
@@ -79,20 +71,13 @@ export function ExplorePage() {
     }
 
     if (bandFilter !== 'all') {
-      const bandVal = Number(bandFilter);
-      list = list.filter((t: any) => {
-        const cb = t.colorBandIdx;
-        // Map index to value: COLOR_BANDS = [80,60,40,20,10,5,1]
-        const bandMap = [80, 60, 40, 20, 10, 5, 1];
-        return bandMap[cb] === bandVal;
-      });
+      list = list.filter((t: any) => t.colorBandIdx === Number(bandFilter));
     }
 
-    if (sortBy === 'latest') {
-      list.sort((a: any, b: any) => b.id - a.id);
-    } else {
-      list.sort((a: any, b: any) => a.id - b.id);
-    }
+    if (sortBy === 'latest') list.sort((a: any, b: any) => b.id - a.id);
+    else if (sortBy === 'oldest') list.sort((a: any, b: any) => a.id - b.id);
+    else if (sortBy === 'level-asc') list.sort((a: any, b: any) => a.divisorIndex - b.divisorIndex || a.id - b.id);
+    else if (sortBy === 'level-desc') list.sort((a: any, b: any) => b.divisorIndex - a.divisorIndex || b.id - a.id);
 
     return list;
   }, [tokens, dotsFilter, gradientFilter, bandFilter, sortBy]);
@@ -181,15 +166,15 @@ export function ExplorePage() {
                     key={token.id}
                     className="token"
                     onClick={() => handleCardClick(token)}
+                    title={`#${token.id} · ${gc} dots · Level ${token.divisorIndex}\nBand: ${COLOR_BAND_LABELS[token.colorBandIdx ?? 0]}\nGradient: ${GRADIENT_LABELS[token.gradientIdx ?? 0]}\nDirection: ${token.direction === 1 ? 'Reverse' : 'Forward'}\nSpeed: ${token.speed ?? 1}`}
                   >
                     <div className="art">
-                      {token.svg ? (
-                        <div dangerouslySetInnerHTML={{ __html: token.svg }} />
-                      ) : token.fetchStatus === 'fail' ? (
-                        <div className="art-fail">?</div>
-                      ) : (
-                        <div className="art-placeholder" />
-                      )}
+                      <div dangerouslySetInnerHTML={{ __html: renderSVG({
+                        seed: token.seed,
+                        divisorIndex: token.divisorIndex,
+                        merges: [],
+                        isMega: token.isMega,
+                      }) }} />
                     </div>
                     <div className="meta">
                       <span className="id">#{token.id}</span>

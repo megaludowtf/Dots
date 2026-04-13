@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-// @ts-ignore
 import { randomSeed } from '../../art/art';
 import { DotArt } from '../shared/DotArt';
 
@@ -29,23 +28,22 @@ export function IntroPage() {
 
   return (
     <section id="intro" className="is-page">
-      <div className="container intro-grid">
+      <div className="container">
         <div className="copy">
           <div className="wordmark">
-            <span className="accent-dot pink" />
-            <span className="accent-dot green" />
             <span>Dots</span>
+            <span className="accent-dot pink" />
+            <span className="accent-dot blue" />
+            <span className="accent-dot green" />
           </div>
           <h1>An onchain edition on MegaETH.</h1>
-          <p className="body">
-            Open mint. Merge dots down from 80 to a single dot, then burn 64 into
-            one terminal Mega Dot. All art lives onchain.
-          </p>
-          <Link to="/mint" className="cta">
-            Mint now &rarr;
-          </Link>
+          <div className="links">
+            <Link to="/mint" className="primary">
+              Mint &rarr;
+            </Link>
+          </div>
         </div>
-        <div className="art-cage" onClick={reroll} title="Click to reroll">
+        <div className="art-cage" onClick={reroll} title="click to reroll">
           <DotArt
             check={{
               seed,
@@ -56,6 +54,7 @@ export function IntroPage() {
           />
         </div>
       </div>
+      <div className="scroll-hint" />
     </section>
   );
 }

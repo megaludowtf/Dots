@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useEventCache } from '@/hooks/useEventCache';
 import { ScrollSentinel } from '@/components/shared/ScrollSentinel';
 import { fmtWhen, shortHash } from '@/lib/format';
+import { ACTIVE_CHAIN } from '@/config/chains';
 import type { NormalisedEvent } from '@/lib/tokenUtils';
 // @ts-ignore
 import { renderSVG } from '@/art/art';
@@ -18,15 +19,22 @@ const FILTERS: { label: string; value: FilterKind }[] = [
   { label: 'Burn', value: 'burn' },
 ];
 
-function renderThumbSvg(event: NormalisedEvent): string | null {
+function renderThumbSvg(
+  event: NormalisedEvent,
+  mintedBy: Map<string, { seed: number }>,
+): string | null {
   try {
     const args = event.args as any;
     if (event.kind === 'mint') {
       return renderSVG({ seed: Number(args.seed ?? 0), divisorIndex: 0, merges: [], isMega: 0 });
     }
     if (event.kind === 'merge') {
+      // Look up the survivor's actual seed so each merge renders uniquely.
+      const sid = String(args.survivorId ?? 0);
+      const mint = mintedBy.get(sid);
+      const seed = mint ? mint.seed : 0;
       return renderSVG({
-        seed: 0,
+        seed,
         divisorIndex: Number(args.newDivisorIndex ?? 1),
         merges: [],
         isMega: 0,
@@ -74,7 +82,7 @@ function eventTokenIds(event: NormalisedEvent): string {
 }
 
 export function TimelinePage() {
-  const { events, blockTs, isLoading } = useEventCache();
+  const { events, blockTs, mintedBy, isLoading } = useEventCache();
   const [filter, setFilter] = useState<FilterKind>('all');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -126,7 +134,7 @@ export function TimelinePage() {
         ) : (
           <ol className="timeline-feed">
             {visible.map((event, i) => {
-              const thumbSvg = renderThumbSvg(event);
+              const thumbSvg = renderThumbSvg(event, mintedBy);
               const kindClass = `tl-${event.kind}`;
               const ts = blockTs.get(event.block);
               return (
@@ -155,7 +163,14 @@ export function TimelinePage() {
                       <span className="tl-when">
                         {ts !== undefined ? fmtWhen(ts) : ''}
                       </span>
-                      <span className="tl-tx">{shortHash(event.tx)}</span>
+                      <a
+                        className="tl-tx"
+                        href={`${ACTIVE_CHAIN.blockExplorers.default.url}/tx/${event.tx}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {shortHash(event.tx)}
+                      </a>
                     </div>
                   </div>
                 </li>

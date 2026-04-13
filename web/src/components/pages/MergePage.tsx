@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useMerge } from '@/contexts/MergeContext';
 import { useMergeAction } from '@/hooks/useMergeAction';
-import { useOwnedTokens } from '@/hooks/useOwnedTokens';
 import { StatusMessage } from '@/components/shared/StatusMessage';
+import { PickerModal } from '@/components/modals/PickerModal';
 import { hasContract } from '@/config/contract';
 import { useAccount } from 'wagmi';
 // @ts-ignore
@@ -20,7 +20,7 @@ export function MergePage() {
     if (!survivor || !burn) return false;
     if (survivor.id === burn.id) return false;
     if (survivor.divisorIndex !== burn.divisorIndex) return false;
-    if (survivor.divisorIndex >= 7) return false; // cannot merge mega dots
+    if (survivor.divisorIndex >= 6) return false;
     return true;
   }, [survivor, burn]);
 
@@ -44,20 +44,31 @@ export function MergePage() {
     merge(survivor.id, burn.id, swap);
   };
 
+  // When merge succeeds, clear slots
+  if (status === 'success' && survivor) {
+    clear();
+  }
+
   const statusText = (() => {
-    if (status === 'confirming') return 'Confirm in wallet...';
-    if (status === 'pending') return 'Waiting for confirmation...';
-    if (status === 'success') return `Merged! tx: ${txHash}`;
+    if (status === 'confirming') return 'Confirm in wallet…';
+    if (status === 'pending') return `Submitted ${txHash?.slice(0, 10)}… waiting`;
+    if (status === 'success') return 'Merged!';
     if (status === 'error') return error?.message ?? 'Transaction failed';
-    if (survivor && burn && !isValidPair) {
-      if (survivor.id === burn.id) return 'Cannot merge a token with itself';
-      if (survivor.divisorIndex !== burn.divisorIndex) return 'Both tokens must be at the same level';
-      if (survivor.divisorIndex >= 7) return 'Cannot merge mega dots';
+    if (survivor && burn) {
+      if (survivor.id === burn.id) return 'Survivor and burn must be different tokens.';
+      if (survivor.divisorIndex !== burn.divisorIndex) return 'Both tokens must share the same level.';
+      if (survivor.divisorIndex >= 6) return 'Cannot merge past level 5. Use infinity() for the Mega Dot.';
+      if (isValidPair) return `Ready to merge. Survivor advances to ${glyphCount(survivor.divisorIndex + 1)} dots.`;
     }
     return '';
   })();
 
   const statusTone = status === 'success' ? 'ok' : (status === 'error' || (survivor && burn && !isValidPair)) ? 'err' : '';
+
+  // Picker filter: if other slot is filled, restrict to same divisor
+  const otherSlot = pickerSlot === 'survivor' ? burn : survivor;
+  const filterDivisor = otherSlot ? otherSlot.divisorIndex : undefined;
+  const excludeIds = [survivor?.id, burn?.id].filter((id): id is number => id != null);
 
   const renderSlot = (token: any, label: string, slotType: 'survivor' | 'burn') => (
     <div
@@ -81,7 +92,7 @@ export function MergePage() {
           }
         })()
       ) : (
-        <div className="placeholder">Click to pick {label}</div>
+        <div className="placeholder">Click to pick<br />{label}</div>
       )}
     </div>
   );
@@ -93,8 +104,8 @@ export function MergePage() {
           <span className="eyebrow">06 &mdash; Merge</span>
           <h2>Burn two, advance one.</h2>
           <p className="body">
-            Pick two tokens you own at the same level. One burns, the other
-            advances to the next divisor.
+            Pick two tokens you own at the same level. The first slot survives;
+            the second is burned. Advance one step down the ladder.
           </p>
         </div>
 
@@ -107,7 +118,7 @@ export function MergePage() {
             {resultSvg ? (
               <div dangerouslySetInnerHTML={{ __html: resultSvg }} />
             ) : (
-              <div className="placeholder">Result preview</div>
+              <div className="placeholder">Merged<br />result preview</div>
             )}
           </div>
         </div>
@@ -119,7 +130,7 @@ export function MergePage() {
               checked={swap}
               onChange={(e) => setSwap(e.target.checked)}
             />
-            Copy the 2nd token&rsquo;s visual DNA onto the child
+            <span>Copy the 2nd token&rsquo;s visual DNA onto the child</span>
           </label>
 
           <button
@@ -127,32 +138,25 @@ export function MergePage() {
             disabled={!isConnected || !hasContract || !isValidPair || status === 'confirming' || status === 'pending'}
             onClick={handleMerge}
           >
-            MERGE
+            Merge &rarr;
           </button>
         </div>
 
         <StatusMessage text={statusText} tone={statusTone as 'ok' | 'err' | ''} />
-
-        {/* Inline picker hint when a slot is clicked */}
-        {pickerSlot && (
-          <div style={{ marginTop: 16 }}>
-            <p className="body">
-              Select a token from your{' '}
-              <a
-                href="/profile"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setPickerSlot(null);
-                }}
-                style={{ textDecoration: 'underline', color: 'var(--text)' }}
-              >
-                profile
-              </a>{' '}
-              to set as the {pickerSlot}. Or use the token picker modal below.
-            </p>
-          </div>
-        )}
       </div>
+
+      {/* Token picker modal — opens when a slot is clicked */}
+      <PickerModal
+        open={pickerSlot !== null}
+        onClose={() => setPickerSlot(null)}
+        onSelect={(token) => {
+          if (pickerSlot === 'survivor') setSurvivor(token);
+          else if (pickerSlot === 'burn') setBurn(token);
+          setPickerSlot(null);
+        }}
+        filterDivisor={filterDivisor}
+        excludeIds={excludeIds}
+      />
     </section>
   );
 }

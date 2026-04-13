@@ -1565,9 +1565,9 @@ footer .links a:hover { color: var(--text); }
   inset: 0;
   z-index: 1000;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
 }
 .lineage-modal .lineage-backdrop {
   position: absolute;
@@ -1578,10 +1578,11 @@ footer .links a:hover { color: var(--text); }
 }
 .lineage-modal .lineage-dialog {
   position: relative;
-  width: min(1100px, 100%);
-  max-height: min(90vh, 820px);
+  width: 100%;
+  height: 100%;
+  max-height: 100vh;
   background: var(--bg);
-  border: 1px solid var(--border-strong);
+  border: none;
   display: flex;
   flex-direction: column;
 }
@@ -1751,7 +1752,7 @@ footer .links a:hover { color: var(--text); }
 
 @media (max-width: 560px) {
   .lineage-modal { padding: 12px; }
-  .lineage-modal .lineage-dialog { max-height: 94vh; }
+  .lineage-modal .lineage-dialog { max-height: 100vh; }
   .lineage-modal .lineage-head { padding: 14px 16px; }
   .lineage-modal .lineage-toolbar { padding: 10px 16px; }
   .lineage-modal .lineage-viewport { padding: 12px; }
@@ -1813,7 +1814,7 @@ footer .links a:hover { color: var(--text); }
   --section-py: clamp(48px, 7vw, 96px);
 }
 
-body > section.is-page {
+section.is-page {
   /* Each active page aims for one viewport height but allows the body to
      scroll if content doesn't fit — avoids trapping users on a section they
      can't scroll. `min-height` (not `height`) is the important part. */
@@ -1922,7 +1923,7 @@ section .section-head .eyebrow { margin-bottom: 6px; font-size: 10px; }
 
 /* Adjust sections that wrap the viewport-fit calc on small screens. */
 @media (max-width: 820px) {
-  body > section.is-page { padding-top: 100px; padding-bottom: 16px; }
+  section.is-page { padding-top: 100px; padding-bottom: 16px; }
   /* Stacked mint panel: preview on top as a visible square, details beneath. */
   #mint .section-head { margin-bottom: 14px; }
   #mint .panel { grid-template-columns: 1fr; gap: 0; }
@@ -1976,7 +1977,7 @@ section .section-head .eyebrow { margin-bottom: 6px; font-size: 10px; }
 }
 
 @media (max-width: 560px) {
-  body > section.is-page { padding-top: 96px; padding-bottom: 20px; }
+  section.is-page { padding-top: 96px; padding-bottom: 20px; }
   section .section-head { margin-bottom: 16px; }
   section .section-head h2 { font-size: clamp(20px, 5.5vw, 28px); margin-bottom: 6px; }
   section .section-head .body { font-size: 10px; }
@@ -2024,14 +2025,15 @@ section .section-head .eyebrow { margin-bottom: 6px; font-size: 10px; }
    with `.is-page` is displayed; clicking a nav pill switches which class is
    applied. `!important` is required because earlier rules set `display` via
    higher-specificity ID selectors (e.g. `#intro { display: flex }`). */
-body > section { display: none !important; }
-body > section.is-page {
-  display: block !important;
+/* In the vanilla SPA `body > section` toggled page visibility. In the
+   React app, React Router renders only the active page, so we just need
+   the is-page styling to apply inside #root. */
+section.is-page {
+  display: block;
   min-height: calc(100vh - 120px);
 }
-/* #intro uses a flex layout for its hero grid, so the active-page override
-   needs to restore flex, not block. */
-body > section#intro.is-page { display: flex !important; }
+/* #intro uses a flex layout for its hero grid. */
+section#intro.is-page { display: flex; }
 /* Remove the single-page scroll indicator below intro — there's nothing
    below to scroll to anymore. */
 #intro .scroll-hint { display: none; }

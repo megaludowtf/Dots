@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { CONTRACT_ADDRESS, ABI } from '../config/contract';
 import { usePostTxRefresh } from './usePostTxRefresh';
@@ -14,6 +14,7 @@ export interface UseInfinityAction {
 
 export function useInfinityAction(): UseInfinityAction {
   const refresh = usePostTxRefresh();
+  const lastRefreshedHash = useRef<string | undefined>(undefined);
 
   const {
     writeContract,
@@ -30,8 +31,11 @@ export function useInfinityAction(): UseInfinityAction {
   } = useWaitForTransactionReceipt({ hash: txHash });
 
   useEffect(() => {
-    if (isSuccess) refresh();
-  }, [isSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (isSuccess && txHash && txHash !== lastRefreshedHash.current) {
+      lastRefreshedHash.current = txHash;
+      refresh();
+    }
+  }, [isSuccess, txHash]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const infinity = (tokenIds: number[]) => {
     reset();

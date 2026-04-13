@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { CONTRACT_ADDRESS, ABI } from '../config/contract';
 import { usePostTxRefresh } from './usePostTxRefresh';
@@ -14,6 +14,7 @@ export interface UseMintAction {
 
 export function useMintAction(): UseMintAction {
   const refresh = usePostTxRefresh();
+  const lastRefreshedHash = useRef<string | undefined>(undefined);
 
   const {
     writeContract,
@@ -29,10 +30,14 @@ export function useMintAction(): UseMintAction {
     error: receiptError,
   } = useWaitForTransactionReceipt({ hash: txHash });
 
-  // Refresh caches on success.
+  // Refresh caches on success — track which txHash was already refreshed
+  // so repeated mints each trigger their own refresh.
   useEffect(() => {
-    if (isSuccess) refresh();
-  }, [isSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (isSuccess && txHash && txHash !== lastRefreshedHash.current) {
+      lastRefreshedHash.current = txHash;
+      refresh();
+    }
+  }, [isSuccess, txHash]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const mint = (amount: number, value: bigint) => {
     reset();

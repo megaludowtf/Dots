@@ -75,7 +75,8 @@ export function useEventCache(): UseEventCacheResult {
   const { data, isLoading, error } = useQuery<EventCacheData>({
     queryKey: ['dots', 'eventCache'],
     enabled: hasContract && !!publicClient,
-    staleTime: Infinity,
+    staleTime: 30_000,          // Auto-refresh every 30s
+    refetchOnWindowFocus: true,  // Refresh when user returns to tab
     queryFn: async (): Promise<EventCacheData> => {
       if (!publicClient) throw new Error('No public client');
 

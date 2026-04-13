@@ -11,9 +11,9 @@ const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 3;
 
 // SVG node dimensions for tree rendering
-const NODE_W = 80;
-const NODE_H = 100;
-const NODE_GAP_Y = 120;
+const NODE_W = 160;
+const NODE_H = 200;
+const NODE_GAP_Y = 240;
 
 function renderTreeSvg(root: TreeNode): string {
   const lines: string[] = [];
@@ -34,11 +34,14 @@ function renderTreeSvg(root: TreeNode): string {
     const fill = n.missing ? '#0d0d12' : '#0a0a0d';
     const strokeColor = isRoot ? '#fff' : '#242430';
 
+    const pad = 6;
+    const artW = NODE_W - pad * 2;
+    const artH = NODE_H - 30;
     nodes.push(
-      `<g class="lineage-node${rootClass}" data-id="${n.id}" transform="translate(${n.x - NODE_W / 2},${n.y})">
-        <rect width="${NODE_W}" height="${NODE_H}" fill="${fill}" stroke="${strokeColor}" stroke-width="1" rx="0" />
-        ${n.svg ? `<g transform="scale(${NODE_W / 680}, ${(NODE_H - 20) / 840}) translate(0,0)">${n.svg.replace(/<\/?svg[^>]*>/g, '')}</g>` : ''}
-        <text x="${NODE_W / 2}" y="${NODE_H + 14}" text-anchor="middle" fill="#8b8b93" font-family="monospace" font-size="9" letter-spacing="0.1em">#${n.id}${n.missing ? ' ?' : ''}</text>
+      `<g class="lineage-node${rootClass}" data-id="${n.id}" style="cursor:pointer" transform="translate(${n.x - NODE_W / 2},${n.y})">
+        <rect width="${NODE_W}" height="${NODE_H}" fill="${fill}" stroke="${strokeColor}" stroke-width="${isRoot ? 2 : 1}" rx="4" />
+        ${n.svg ? `<svg x="${pad}" y="${pad}" width="${artW}" height="${artH}" viewBox="0 0 680 840" preserveAspectRatio="xMidYMid meet">${n.svg.replace(/<\/?svg[^>]*>/g, '')}</svg>` : `<rect x="${pad}" y="${pad}" width="${artW}" height="${artH}" fill="#1e1e2a" rx="2" />`}
+        <text x="${NODE_W / 2}" y="${NODE_H - 6}" text-anchor="middle" fill="${isRoot ? '#fff' : '#8b8b93'}" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em">#${n.id}${n.missing ? ' ?' : ''}</text>
       </g>`
     );
   }
@@ -129,7 +132,9 @@ export function LineageModal() {
 
       const node = buildLineageNode(idStr, level, mintedBy, mergedBy, infinityBy);
       if (!node) return null;
-      const laid = layoutTree(node);
+      // layoutTree(node, yStep, xStart, xEnd, depth)
+      const treeWidth = Math.max(2000, Math.pow(2, level) * (NODE_W + 20));
+      const laid = layoutTree(node, NODE_GAP_Y, 0, treeWidth, 0);
       return renderTreeSvg(laid);
     } catch {
       return null;

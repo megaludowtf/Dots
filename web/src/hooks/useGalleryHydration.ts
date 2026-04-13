@@ -21,7 +21,7 @@ export function useGalleryHydration(tokens: LiveToken[]): HydratedToken[] {
       queryKey: ['dots', 'gallery', 'tokenURI', token.id],
       enabled: hasContract && !!publicClient,
       staleTime: Infinity,
-      queryFn: async (): Promise<Omit<HydratedToken, keyof LiveToken>> => {
+      queryFn: async (): Promise<Pick<HydratedToken, 'svg' | 'fetchStatus'>> => {
         if (!publicClient) throw new Error('No public client');
 
         const uri = await publicClient.readContract({
@@ -39,7 +39,11 @@ export function useGalleryHydration(tokens: LiveToken[]): HydratedToken[] {
 
         if (uri.startsWith('data:application/json;base64,')) {
           const json = JSON.parse(atob(uri.slice('data:application/json;base64,'.length)));
-          svg = json.image ?? null;
+          // json.image is "data:image/svg+xml;base64,<encoded>" — decode to raw SVG markup.
+          const imgUri: string = json.image ?? '';
+          if (imgUri.startsWith('data:image/svg+xml;base64,')) {
+            svg = atob(imgUri.slice('data:image/svg+xml;base64,'.length));
+          }
           if (json.attributes) {
             for (const attr of json.attributes) {
               const cbIdx = COLOR_BAND_LABELS.indexOf(attr.value);
@@ -52,7 +56,7 @@ export function useGalleryHydration(tokens: LiveToken[]): HydratedToken[] {
           }
         }
 
-        return { svg, colorBandIdx, gradientIdx, direction, speed, fetchStatus: 'ok' as const };
+        return { svg, fetchStatus: 'ok' as const };
       },
     })),
   });

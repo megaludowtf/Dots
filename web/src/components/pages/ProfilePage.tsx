@@ -6,7 +6,7 @@ import { useMerge } from '@/contexts/MergeContext';
 import { useLineage } from '@/contexts/LineageContext';
 import { shortAddr } from '@/lib/format';
 // @ts-ignore
-import { glyphCount } from '@/art/art';
+import { glyphCount, renderSVG } from '@/art/art';
 
 const DOTS_OPTIONS = [
   { label: 'All', value: 'all' },
@@ -19,26 +19,17 @@ const DOTS_OPTIONS = [
   { label: '1', value: '1' },
 ];
 
+const GRADIENT_LABELS = ['None', 'Linear', 'Reflected', 'Angled', 'Double Angled', 'Linear Double', 'Linear Z'];
+const COLOR_BAND_LABELS = ['Eighty', 'Sixty', 'Forty', 'Twenty', 'Ten', 'Five', 'One'];
+
 const GRADIENT_OPTIONS = [
   { label: 'All', value: 'all' },
-  { label: 'None', value: '0' },
-  { label: 'Linear', value: '1' },
-  { label: 'Radial', value: '2' },
-  { label: 'Conic', value: '5' },
-  { label: 'Stripe', value: '8' },
-  { label: 'Checker', value: '9' },
-  { label: 'Diamond', value: '10' },
+  ...GRADIENT_LABELS.map((l, i) => ({ label: l, value: String(i) })),
 ];
 
 const COLOR_BAND_OPTIONS = [
   { label: 'All', value: 'all' },
-  { label: 'Eighty', value: '80' },
-  { label: 'Sixty', value: '60' },
-  { label: 'Forty', value: '40' },
-  { label: 'Twenty', value: '20' },
-  { label: 'Ten', value: '10' },
-  { label: 'Five', value: '5' },
-  { label: 'One', value: '1' },
+  ...COLOR_BAND_LABELS.map((l, i) => ({ label: l, value: String(i) })),
 ];
 
 const GLYPH_TO_DIVISOR: Record<number, number> = { 80: 0, 40: 1, 20: 2, 10: 3, 5: 4, 4: 5, 1: 6 };
@@ -53,6 +44,7 @@ export function ProfilePage() {
   const [dotsFilter, setDotsFilter] = useState('all');
   const [gradientFilter, setGradientFilter] = useState('all');
   const [bandFilter, setBandFilter] = useState('all');
+  const [sort, setSort] = useState<'latest' | 'oldest' | 'level-asc' | 'level-desc'>('latest');
 
   // Stats breakdown by divisor
   const divisorCounts = useMemo(() => {
@@ -81,13 +73,17 @@ export function ProfilePage() {
     }
 
     if (bandFilter !== 'all') {
-      const bandVal = Number(bandFilter);
-      const bandMap = [80, 60, 40, 20, 10, 5, 1];
-      list = list.filter((t: any) => bandMap[t.colorBandIdx] === bandVal);
+      list = list.filter((t: any) => t.colorBandIdx === Number(bandFilter));
     }
 
+    // Sort
+    if (sort === 'latest') list.sort((a: any, b: any) => b.id - a.id);
+    else if (sort === 'oldest') list.sort((a: any, b: any) => a.id - b.id);
+    else if (sort === 'level-asc') list.sort((a: any, b: any) => a.divisorIndex - b.divisorIndex || a.id - b.id);
+    else if (sort === 'level-desc') list.sort((a: any, b: any) => b.divisorIndex - a.divisorIndex || b.id - a.id);
+
     return list;
-  }, [tokens, dotsFilter, gradientFilter, bandFilter]);
+  }, [tokens, dotsFilter, gradientFilter, bandFilter, sort]);
 
   const handleMerge = (token: any) => {
     setSurvivor(token);
@@ -150,6 +146,15 @@ export function ProfilePage() {
               ))}
             </select>
           </div>
+          <div className="filter-group">
+            <span className="label">Sort</span>
+            <select value={sort} onChange={(e) => setSort(e.target.value as any)}>
+              <option value="latest">Latest</option>
+              <option value="oldest">Oldest</option>
+              <option value="level-asc">Level ↑</option>
+              <option value="level-desc">Level ↓</option>
+            </select>
+          </div>
         </div>
 
         <div className="profile-grid">
@@ -163,13 +168,18 @@ export function ProfilePage() {
             filtered.map((token: any) => {
               const gc = glyphCount(token.divisorIndex);
               return (
-                <div key={token.id} className="profile-card">
+                <div
+                  key={token.id}
+                  className="profile-card"
+                  title={`#${token.id} · ${gc} dots · Level ${token.divisorIndex}\nBand: ${COLOR_BAND_LABELS[token.colorBandIdx ?? 0]}\nGradient: ${GRADIENT_LABELS[token.gradientIdx ?? 0]}\nDirection: ${token.direction === 1 ? 'Reverse' : 'Forward'}\nSpeed: ${token.speed ?? 1}`}
+                >
                   <div className="art">
-                    {token.svg ? (
-                      <div dangerouslySetInnerHTML={{ __html: token.svg }} />
-                    ) : (
-                      <div className="art-placeholder" />
-                    )}
+                    <div dangerouslySetInnerHTML={{ __html: renderSVG({
+                      seed: token.seed,
+                      divisorIndex: token.divisorIndex,
+                      merges: [],
+                      isMega: token.isMega ?? 0,
+                    }) }} />
                   </div>
                   <div className="meta">
                     <span className="id">#{token.id}</span>

@@ -1,9 +1,10 @@
 import { useAccount, usePublicClient } from 'wagmi';
 import { useQuery } from '@tanstack/react-query';
-import { CONTRACT_ADDRESS, ABI, hasContract } from '../config/contract';
+import { CONTRACT_ADDRESS, hasContract } from '../config/contract';
+import { useEventCache } from './useEventCache';
+import { deriveTraits } from '../art/art';
 import type { HydratedToken } from '../lib/tokenUtils';
 
-// ERC-721 Transfer event for scanning ownership.
 const TRANSFER_EVENT = {
   type: 'event' as const,
   name: 'Transfer' as const,
@@ -14,132 +15,72 @@ const TRANSFER_EVENT = {
   ],
 };
 
-const COLOR_BAND_LABELS = ['Eighty', 'Sixty', 'Forty', 'Twenty', 'Ten', 'Five', 'One'];
-const GRADIENT_LABELS = ['None', 'Linear', 'Reflected', 'Angled', 'Double Angled', 'Linear Double', 'Linear Z'];
-
-export interface UseOwnedTokensResult {
-  tokens: HydratedToken[];
-  isLoading: boolean;
-  error: Error | null;
-}
-
-export function useOwnedTokens(): UseOwnedTokensResult {
+export function useOwnedTokens() {
   const { address } = useAccount();
   const publicClient = usePublicClient();
+  const { mintedBy, mergedBy, infinityBy } = useEventCache();
 
-  const { data, isLoading, error } = useQuery<HydratedToken[]>({
+  const { data: tokens, isLoading, error } = useQuery<HydratedToken[]>({
     queryKey: ['dots', 'ownedTokens', address],
-    enabled: hasContract && !!address && !!publicClient,
+    enabled: hasContract && !!publicClient && !!address && mintedBy.size > 0,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
     queryFn: async (): Promise<HydratedToken[]> => {
       if (!publicClient || !address) return [];
 
+      // 1. Fetch Transfer logs to/from this address.
       const common = { address: CONTRACT_ADDRESS, fromBlock: 0n, toBlock: 'latest' as const };
-
-      // Fetch Transfer logs where account is sender or receiver.
-      const [incoming, outgoing] = await Promise.all([
+      const [inLogs, outLogs] = await Promise.all([
         publicClient.getLogs({ ...common, event: TRANSFER_EVENT, args: { to: address } }),
         publicClient.getLogs({ ...common, event: TRANSFER_EVENT, args: { from: address } }),
       ]);
 
-      // Compute net held set.
-      const held = new Map<string, number>(); // tokenId -> net balance (always 0 or 1 for ERC-721)
-      for (const l of incoming) {
-        const id = (l.args as any).tokenId.toString();
-        held.set(id, (held.get(id) ?? 0) + 1);
-      }
-      for (const l of outgoing) {
-        const id = (l.args as any).tokenId.toString();
-        held.set(id, (held.get(id) ?? 0) - 1);
-      }
+      // 2. Walk events in block order to compute net held set.
+      const events: { block: bigint; logIndex: number; id: string; dir: number }[] = [];
+      for (const l of inLogs) events.push({ block: l.blockNumber, logIndex: l.logIndex, id: (l.args as any).tokenId.toString(), dir: 1 });
+      for (const l of outLogs) events.push({ block: l.blockNumber, logIndex: l.logIndex, id: (l.args as any).tokenId.toString(), dir: -1 });
+      events.sort((a, b) => a.block === b.block ? Number(a.logIndex - b.logIndex) : Number(a.block - b.block));
 
-      const ownedIds: string[] = [];
-      for (const [id, count] of held) {
-        if (count > 0) ownedIds.push(id);
+      const held = new Map<string, number>();
+      for (const e of events) {
+        held.set(e.id, (held.get(e.id) ?? 0) + e.dir);
       }
 
-      if (ownedIds.length === 0) return [];
+      // 3. Build token list from event cache — zero RPC calls per token.
+      const tokens: HydratedToken[] = [];
+      for (const [idStr, count] of held) {
+        if (count <= 0) continue;
 
-      // Fetch getDot + tokenURI for each owned token in parallel.
-      const results = await Promise.all(
-        ownedIds.map(async (idStr): Promise<HydratedToken> => {
-          const tokenId = BigInt(idStr);
-          try {
-            const [dotResult, uriResult] = await Promise.all([
-              publicClient.readContract({
-                address: CONTRACT_ADDRESS,
-                abi: ABI,
-                functionName: 'getDot',
-                args: [tokenId],
-              }),
-              publicClient.readContract({
-                address: CONTRACT_ADDRESS,
-                abi: ABI,
-                functionName: 'tokenURI',
-                args: [tokenId],
-              }),
-            ]);
+        const mint = mintedBy.get(idStr);
+        if (!mint) continue;
 
-            const dot = dotResult as any;
-            const uri = uriResult as string;
+        // Derive divisorIndex from merge history (same logic as computeLiveTokens).
+        const mergeList = mergedBy.get(idStr) || [];
+        let divisorIndex = mergeList.length;
+        let isMega = 0;
+        if (infinityBy.has(idStr)) {
+          divisorIndex = 7;
+          isMega = 1;
+        }
 
-            // Parse base64 JSON tokenURI.
-            let svg: string | null = null;
-            let colorBandIdx: number | undefined;
-            let gradientIdx: number | undefined;
-            let direction: number | undefined;
-            let speed: number | undefined;
+        const traits = deriveTraits(mint.seed);
+        tokens.push({
+          id: Number(idStr),
+          seed: mint.seed,
+          divisorIndex,
+          isMega,
+          svg: null,
+          colorBandIdx: traits.colorBandIdx,
+          gradientIdx: traits.gradientIdx,
+          direction: traits.direction,
+          speed: traits.speed,
+          fetchStatus: 'ok',
+        });
+      }
 
-            if (uri.startsWith('data:application/json;base64,')) {
-              try {
-                const json = JSON.parse(atob(uri.slice('data:application/json;base64,'.length)));
-                svg = json.image ?? null;
-                if (json.attributes) {
-                  for (const attr of json.attributes) {
-                    const idx = COLOR_BAND_LABELS.indexOf(attr.value);
-                    if (attr.trait_type === 'Color Band' && idx !== -1) colorBandIdx = idx;
-                    const gIdx = GRADIENT_LABELS.indexOf(attr.value);
-                    if (attr.trait_type === 'Gradient' && gIdx !== -1) gradientIdx = gIdx;
-                    if (attr.trait_type === 'Direction') direction = attr.value === 'Reverse' ? 1 : 0;
-                    if (attr.trait_type === 'Speed') speed = Number(attr.value);
-                  }
-                }
-              } catch {
-                // Parse failure — leave defaults.
-              }
-            }
-
-            return {
-              id: Number(idStr),
-              seed: Number(dot.seed),
-              divisorIndex: Number(dot.divisorIndex),
-              isMega: Number(dot.isMega),
-              svg,
-              colorBandIdx,
-              gradientIdx,
-              direction,
-              speed,
-              fetchStatus: 'ok',
-            };
-          } catch {
-            return {
-              id: Number(idStr),
-              seed: 0,
-              divisorIndex: 0,
-              isMega: 0,
-              svg: null,
-              fetchStatus: 'fail',
-            };
-          }
-        }),
-      );
-
-      return results;
+      return tokens.sort((a, b) => a.id - b.id);
     },
   });
 
-  return {
-    tokens: data ?? [],
-    isLoading,
-    error: error as Error | null,
-  };
+  return { tokens: tokens ?? [], isLoading, error };
 }
