@@ -154,7 +154,7 @@ contract ArtTest is Test {
 
         assertTrue(_contains(string(json), '"name":"Dot #1"'));
         assertTrue(_contains(string(json), '"image":"data:image/svg+xml;base64,'));
-        assertTrue(_contains(string(json), '"trait_type":"Glyphs","value":80'));
+        assertTrue(_contains(string(json), '"trait_type":"Dots","value":80'));
     }
 
     // -------- helpers --------

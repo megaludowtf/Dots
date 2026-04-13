@@ -3,6 +3,8 @@ import { useEventCache } from '@/hooks/useEventCache';
 import { ScrollSentinel } from '@/components/shared/ScrollSentinel';
 import { fmtWhen, shortHash } from '@/lib/format';
 import { ACTIVE_CHAIN } from '@/config/chains';
+import { useLineage } from '@/contexts/LineageContext';
+import { TokenDetailModal } from '@/components/modals/TokenDetailModal';
 import type { NormalisedEvent } from '@/lib/tokenUtils';
 // @ts-ignore
 import { renderSVG } from '@/art/art';
@@ -83,7 +85,9 @@ function eventTokenIds(event: NormalisedEvent): string {
 
 export function TimelinePage() {
   const { events, blockTs, mintedBy, isLoading } = useEventCache();
+  const { open: openLineage } = useLineage();
   const [filter, setFilter] = useState<FilterKind>('all');
+  const [detailToken, setDetailToken] = useState<any>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const filtered = useMemo(() => {
@@ -100,6 +104,7 @@ export function TimelinePage() {
   }, []);
 
   return (
+    <>
     <section id="timeline" className="is-page">
       <div className="container">
         <div className="section-head">
@@ -137,10 +142,29 @@ export function TimelinePage() {
               const thumbSvg = renderThumbSvg(event, mintedBy);
               const kindClass = `tl-${event.kind}`;
               const ts = blockTs.get(event.block);
+              const args = event.args as any;
+              const lineageId = event.kind === 'mint' ? args.tokenId?.toString()
+                : event.kind === 'merge' ? args.survivorId?.toString()
+                : event.kind === 'infinity' ? args.megaDotId?.toString()
+                : null;
               return (
                 <li
                   key={`${event.tx}-${event.logIndex}`}
                   className={`tl-entry tl-entry-clickable ${kindClass}`}
+                  onClick={() => {
+                    if (!lineageId) return;
+                    const mint = mintedBy.get(lineageId);
+                    if (mint) {
+                      const mergeList = (event as any).kind === 'merge' ? Number((event.args as any).newDivisorIndex ?? 0) : 0;
+                      setDetailToken({
+                        id: Number(lineageId),
+                        seed: mint.seed,
+                        divisorIndex: event.kind === 'merge' ? Number((event.args as any).newDivisorIndex ?? 0) : event.kind === 'infinity' ? 7 : 0,
+                        isMega: event.kind === 'infinity' ? 1 : 0,
+                      });
+                    }
+                  }}
+                  style={{ cursor: lineageId ? 'pointer' : 'default' }}
                 >
                   <span className="tl-dot" />
                   <div className="tl-thumb">
@@ -189,5 +213,8 @@ export function TimelinePage() {
         )}
       </div>
     </section>
+
+    <TokenDetailModal token={detailToken} onClose={() => setDetailToken(null)} />
+    </>
   );
 }

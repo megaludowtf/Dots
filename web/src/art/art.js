@@ -189,7 +189,7 @@ export function renderSVG(checkOrSeed, d) {
   else if (check.divisorIndex === 6) inner = renderMega(check);
   else if (check.divisorIndex >= 2) inner = renderBlockGrid(check);
   else inner = renderCellGrid(check);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CANVAS_W} ${CANVAS_H}" width="${CANVAS_W}" height="${CANVAS_H}" preserveAspectRatio="xMidYMid meet" overflow="hidden"><rect width="${CANVAS_W}" height="${CANVAS_H}" fill="#0a0a14"/>${SVG_GRID}<defs>${SYMBOL_M}</defs>${inner}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CANVAS_W} ${CANVAS_H}" width="${CANVAS_W}" height="${CANVAS_H}" preserveAspectRatio="xMidYMid meet" overflow="hidden"><defs>${SYMBOL_M}<clipPath id="canvas-clip"><rect width="${CANVAS_W}" height="${CANVAS_H}"/></clipPath></defs><rect width="${CANVAS_W}" height="${CANVAS_H}" fill="#0a0a14"/>${SVG_GRID}<g clip-path="url(#canvas-clip)">${inner}</g></svg>`;
 }
 
 export function randomSeed() {

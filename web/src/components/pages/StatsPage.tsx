@@ -36,10 +36,6 @@ export function StatsPage() {
         <div className="section-head">
           <span className="eyebrow">02 &mdash; Stats</span>
           <h2>Live from the contract.</h2>
-          <p className="body">
-            Read directly from MegaETH. Updates whenever someone mints, merges, or
-            burns.
-          </p>
         </div>
 
         <div className="circulation">

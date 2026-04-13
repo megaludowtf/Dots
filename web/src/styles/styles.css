@@ -1482,7 +1482,7 @@ footer .links a:hover { color: var(--text); }
 
 #profile .profile-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 12px;
   max-height: calc(100vh - 320px);
   overflow-y: auto;
@@ -1880,7 +1880,7 @@ section .section-head .eyebrow { margin-bottom: 6px; font-size: 10px; }
 #explore .toolbar { margin-bottom: 20px; padding-bottom: 16px; }
 #explore .toolbar .count { font-size: 10px; }
 #explore .toolbar .filter button { padding: 6px 12px; font-size: 9px; }
-#explore .gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+#explore .gallery { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
 #explore .token .meta { padding: 10px 12px; font-size: 9px; }
 
 /* ---- Merge ---- */

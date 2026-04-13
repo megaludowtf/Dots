@@ -4,6 +4,7 @@ import { useAccount } from 'wagmi';
 import { useOwnedTokens } from '@/hooks/useOwnedTokens';
 import { useMerge } from '@/contexts/MergeContext';
 import { useLineage } from '@/contexts/LineageContext';
+import { TokenDetailModal } from '@/components/modals/TokenDetailModal';
 import { shortAddr } from '@/lib/format';
 // @ts-ignore
 import { glyphCount, renderSVG } from '@/art/art';
@@ -19,7 +20,7 @@ const DOTS_OPTIONS = [
   { label: '1', value: '1' },
 ];
 
-const GRADIENT_LABELS = ['None', 'Linear', 'Reflected', 'Angled', 'Double Angled', 'Linear Double', 'Linear Z'];
+const GRADIENT_LABELS = ['None', 'Linear', 'Double Linear', 'Reflected', 'Double Angled', 'Angled', 'Linear Z'];
 const COLOR_BAND_LABELS = ['Eighty', 'Sixty', 'Forty', 'Twenty', 'Ten', 'Five', 'One'];
 
 const GRADIENT_OPTIONS = [
@@ -85,6 +86,8 @@ export function ProfilePage() {
     return list;
   }, [tokens, dotsFilter, gradientFilter, bandFilter, sort]);
 
+  const [detailToken, setDetailToken] = useState<any>(null);
+
   const handleMerge = (token: any) => {
     setSurvivor(token);
     navigate('/merge');
@@ -95,6 +98,7 @@ export function ProfilePage() {
   };
 
   return (
+    <>
     <section id="profile" className="is-page">
       <div className="container">
         <div className="section-head">
@@ -171,7 +175,9 @@ export function ProfilePage() {
                 <div
                   key={token.id}
                   className="profile-card"
-                  title={`#${token.id} · ${gc} dots · Level ${token.divisorIndex}\nBand: ${COLOR_BAND_LABELS[token.colorBandIdx ?? 0]}\nGradient: ${GRADIENT_LABELS[token.gradientIdx ?? 0]}\nDirection: ${token.direction === 1 ? 'Reverse' : 'Forward'}\nSpeed: ${token.speed ?? 1}`}
+                  onClick={() => setDetailToken(token)}
+                  style={{ cursor: 'pointer' }}
+                  title={`#${token.id} · ${gc} dots · Level ${token.divisorIndex}\nBand: ${COLOR_BAND_LABELS[token.colorBandIdx ?? 0]}\nGradient: ${GRADIENT_LABELS[token.gradientIdx ?? 0]}\nShift: ${token.direction === 1 ? 'UV' : 'IR'}\nSpeed: ${token.speed === 1 ? '2x' : token.speed === 2 ? '1x' : '0.5x'}`}
                 >
                   <div className="art">
                     <div dangerouslySetInnerHTML={{ __html: renderSVG({
@@ -196,5 +202,8 @@ export function ProfilePage() {
         </div>
       </div>
     </section>
+
+    <TokenDetailModal token={detailToken} onClose={() => setDetailToken(null)} />
+    </>
   );
 }

@@ -25,6 +25,7 @@ export function MintPage() {
   const { mint, status, error, txHash } = useMintAction();
 
   const [amount, setAmount] = useState(1);
+  const [inputValue, setInputValue] = useState('1');
   const [seed] = useState(() => randomSeed());
 
   const clamp = useCallback(
@@ -93,7 +94,7 @@ export function MintPage() {
             <div className="amount-row">
               <label>Amount</label>
               <div className="amount-group">
-                <button onClick={() => setAmount((a) => clamp(a - 1))}>
+                <button onClick={() => { const v = clamp(amount - 1); setAmount(v); setInputValue(String(v)); }}>
                   &minus;
                 </button>
                 <input
@@ -101,11 +102,21 @@ export function MintPage() {
                   type="number"
                   min={1}
                   max={MAX_MINT_PER_TX}
-                  value={amount}
-                  onChange={(e) => setAmount(Number(e.target.value) || 1)}
-                  onBlur={() => setAmount(clamp(amount))}
+                  value={inputValue}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    setInputValue(raw);
+                    const n = parseInt(raw, 10);
+                    if (!isNaN(n)) setAmount(clamp(n));
+                  }}
+                  onBlur={() => {
+                    const v = clamp(amount);
+                    setAmount(v);
+                    setInputValue(String(v));
+                  }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
                 />
-                <button onClick={() => setAmount((a) => clamp(a + 1))}>+</button>
+                <button onClick={() => { const v = clamp(amount + 1); setAmount(v); setInputValue(String(v)); }}>+</button>
               </div>
             </div>
 

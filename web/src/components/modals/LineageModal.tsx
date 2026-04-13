@@ -30,18 +30,20 @@ function renderTreeSvg(root: TreeNode): string {
 
     // Draw the node itself
     const isRoot = n.y === 0;
+    const isLeaf = n.level === 0 && n.children.length === 0;
     const rootClass = isRoot ? ' lineage-node-root' : '';
     const fill = n.missing ? '#0d0d12' : '#0a0a0d';
     const strokeColor = isRoot ? '#fff' : '#242430';
+    const cursor = isLeaf || isRoot ? 'default' : 'pointer';
 
     const pad = 6;
     const artW = NODE_W - pad * 2;
     const artH = NODE_H - 30;
     nodes.push(
-      `<g class="lineage-node${rootClass}" data-id="${n.id}" style="cursor:pointer" transform="translate(${n.x - NODE_W / 2},${n.y})">
-        <rect width="${NODE_W}" height="${NODE_H}" fill="${fill}" stroke="${strokeColor}" stroke-width="${isRoot ? 2 : 1}" rx="4" />
-        ${n.svg ? `<svg x="${pad}" y="${pad}" width="${artW}" height="${artH}" viewBox="0 0 680 840" preserveAspectRatio="xMidYMid meet">${n.svg.replace(/<\/?svg[^>]*>/g, '')}</svg>` : `<rect x="${pad}" y="${pad}" width="${artW}" height="${artH}" fill="#1e1e2a" rx="2" />`}
-        <text x="${NODE_W / 2}" y="${NODE_H - 6}" text-anchor="middle" fill="${isRoot ? '#fff' : '#8b8b93'}" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em">#${n.id}${n.missing ? ' ?' : ''}</text>
+      `<g class="lineage-node${rootClass}" data-id="${n.id}" style="cursor:${cursor}" transform="translate(${n.x - NODE_W / 2},${n.y})">
+        <rect class="lineage-hit" ${isLeaf || isRoot ? '' : `data-node-id="${n.id}" data-node-level="${n.level}"`} width="${NODE_W}" height="${NODE_H}" fill="${fill}" stroke="${strokeColor}" stroke-width="${isRoot ? 2 : 1}" rx="4" />
+        ${n.svg ? `<svg x="${pad}" y="${pad}" width="${artW}" height="${artH}" viewBox="0 0 680 840" preserveAspectRatio="xMidYMid meet" style="pointer-events:none">${n.svg.replace(/<\/?svg[^>]*>/g, '').replace(/<rect[^>]*fill="#0a0a14"[^>]*\/?>/, '')}</svg>` : `<rect x="${pad}" y="${pad}" width="${artW}" height="${artH}" fill="#1e1e2a" rx="2" style="pointer-events:none" />`}
+        <text x="${NODE_W / 2}" y="${NODE_H - 6}" text-anchor="middle" fill="${isRoot ? '#fff' : '#8b8b93'}" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em" style="pointer-events:none">#${n.id}${n.missing ? ' ?' : ''}</text>
       </g>`
     );
   }
@@ -69,10 +71,12 @@ export function LineageModal() {
   const { mintedBy, mergedBy, infinityBy } = useEventCache();
   const viewportRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
-  const [breadcrumbs, setBreadcrumbs] = useState<number[]>([]);
+  const [breadcrumbs, setBreadcrumbs] = useState<{id: number, level: number}[]>([]);
 
   const isOpen = tokenId !== null;
-  const activeId = breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1] : tokenId;
+  const active = breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1] : null;
+  const activeId = active ? active.id : tokenId;
+  const activeLevel = active ? active.level : null; // null = use token's current level
 
   // Lock body scroll
   useEffect(() => {
@@ -125,21 +129,26 @@ export function LineageModal() {
     if (activeId === null || !mintedBy || !mergedBy || !infinityBy) return null;
     try {
       const idStr = String(activeId);
-      // Determine the level of this token
-      const mergeList = mergedBy.get(idStr);
-      let level = mergeList ? mergeList.length : 0;
-      if (infinityBy.has(idStr)) level = 7;
+      // Use the explicit level from breadcrumbs if available,
+      // otherwise determine from the token's current merge state.
+      let level: number;
+      if (activeLevel !== null) {
+        level = activeLevel;
+      } else {
+        const mergeList = mergedBy.get(idStr);
+        level = mergeList ? mergeList.length : 0;
+        if (infinityBy.has(idStr)) level = 7;
+      }
 
       const node = buildLineageNode(idStr, level, mintedBy, mergedBy, infinityBy);
       if (!node) return null;
-      // layoutTree(node, yStep, xStart, xEnd, depth)
       const treeWidth = Math.max(2000, Math.pow(2, level) * (NODE_W + 20));
       const laid = layoutTree(node, NODE_GAP_Y, 0, treeWidth, 0);
       return renderTreeSvg(laid);
     } catch {
       return null;
     }
-  }, [activeId, mintedBy, mergedBy, infinityBy]);
+  }, [activeId, activeLevel, mintedBy, mergedBy, infinityBy]);
 
   const navigateTo = useCallback(
     (idx: number) => {
@@ -156,17 +165,29 @@ export function LineageModal() {
   const zoomOut = () => setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP));
   const resetZoom = () => setZoom(1);
 
-  // Handle click on a tree node to drill down
+  // Handle click on a tree node to drill down.
+  // Each node's background <rect> carries data-node-id — we check the
+  // clicked element and its ancestors for this attribute. This avoids
+  // relying on .closest() which can fail across SVG namespace boundaries.
   useEffect(() => {
     if (!isOpen) return;
     const el = viewportRef.current;
     if (!el) return;
     const handler = (e: MouseEvent) => {
-      const target = (e.target as Element).closest('.lineage-node');
-      if (!target) return;
-      const id = target.getAttribute('data-id');
-      if (id && Number(id) !== activeId) {
-        setBreadcrumbs((bc) => [...bc, Number(id)]);
+      let target = e.target as Element | null;
+      let id: string | null = null;
+      let level: string | null = null;
+      // Walk up from the click target looking for data-node-id.
+      // Root and leaf nodes don't have data-node-id, so they're
+      // naturally excluded (nothing to drill into).
+      while (target && target !== el) {
+        id = target.getAttribute('data-node-id');
+        level = target.getAttribute('data-node-level');
+        if (id) break;
+        target = target.parentElement;
+      }
+      if (id) {
+        setBreadcrumbs((bc) => [...bc, { id: Number(id!), level: Number(level ?? 0) }]);
       }
     };
     el.addEventListener('click', handler);
@@ -213,14 +234,14 @@ export function LineageModal() {
             >
               #{tokenId}
             </button>
-            {breadcrumbs.map((id, idx) => (
+            {breadcrumbs.map((crumb, idx) => (
               <span key={idx}>
                 <span className="lineage-crumb-sep">&rsaquo;</span>
                 <button
                   className={`lineage-crumb${idx === breadcrumbs.length - 1 ? ' active' : ''}`}
                   onClick={() => navigateTo(idx)}
                 >
-                  #{id}
+                  #{crumb.id}
                 </button>
               </span>
             ))}

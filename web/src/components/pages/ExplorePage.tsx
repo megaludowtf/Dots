@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useLiveTokens } from '@/hooks/useLiveTokens';
-import { useMerge } from '@/contexts/MergeContext';
+import { useLineage } from '@/contexts/LineageContext';
 import { ScrollSentinel } from '@/components/shared/ScrollSentinel';
+import { TokenDetailModal } from '@/components/modals/TokenDetailModal';
 import { glyphCount, renderSVG } from '@/art/art';
 
 const PAGE_SIZE = 30;
@@ -18,7 +18,7 @@ const DOTS_OPTIONS = [
   { label: '1', value: '1' },
 ];
 
-const GRADIENT_LABELS = ['None', 'Linear', 'Reflected', 'Angled', 'Double Angled', 'Linear Double', 'Linear Z'];
+const GRADIENT_LABELS = ['None', 'Linear', 'Double Linear', 'Reflected', 'Double Angled', 'Angled', 'Linear Z'];
 const COLOR_BAND_LABELS = ['Eighty', 'Sixty', 'Forty', 'Twenty', 'Ten', 'Five', 'One'];
 
 const GRADIENT_OPTIONS = [
@@ -45,9 +45,6 @@ export function ExplorePage() {
   // Render SVGs client-side from seed + divisorIndex — instant, no RPC calls.
   // Colors may differ slightly from canonical tokenURI (different hash function)
   // but avoids the per-token RPC bottleneck that makes the gallery slow.
-  const { setSurvivor } = useMerge();
-  const navigate = useNavigate();
-
   const [dotsFilter, setDotsFilter] = useState('all');
   const [gradientFilter, setGradientFilter] = useState('all');
   const [bandFilter, setBandFilter] = useState('all');
@@ -89,12 +86,15 @@ export function ExplorePage() {
     setVisibleCount((c) => c + PAGE_SIZE);
   }, []);
 
+  const { open: openLineage } = useLineage();
+  const [detailToken, setDetailToken] = useState<any>(null);
+
   const handleCardClick = (token: any) => {
-    setSurvivor(token);
-    navigate('/merge');
+    setDetailToken(token);
   };
 
   return (
+    <>
     <section id="explore" className="is-page">
       <div className="container">
         <div className="section-head">
@@ -166,7 +166,7 @@ export function ExplorePage() {
                     key={token.id}
                     className="token"
                     onClick={() => handleCardClick(token)}
-                    title={`#${token.id} · ${gc} dots · Level ${token.divisorIndex}\nBand: ${COLOR_BAND_LABELS[token.colorBandIdx ?? 0]}\nGradient: ${GRADIENT_LABELS[token.gradientIdx ?? 0]}\nDirection: ${token.direction === 1 ? 'Reverse' : 'Forward'}\nSpeed: ${token.speed ?? 1}`}
+                    title={`#${token.id} · ${gc} dots · Level ${token.divisorIndex}\nBand: ${COLOR_BAND_LABELS[token.colorBandIdx ?? 0]}\nGradient: ${GRADIENT_LABELS[token.gradientIdx ?? 0]}\nShift: ${token.direction === 1 ? 'UV' : 'IR'}\nSpeed: ${token.speed === 1 ? '2x' : token.speed === 2 ? '1x' : '0.5x'}`}
                   >
                     <div className="art">
                       <div dangerouslySetInnerHTML={{ __html: renderSVG({
@@ -199,5 +199,8 @@ export function ExplorePage() {
         </div>
       </div>
     </section>
+
+    <TokenDetailModal token={detailToken} onClose={() => setDetailToken(null)} />
+    </>
   );
 }

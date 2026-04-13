@@ -68,7 +68,7 @@ library DotsArt {
 
     function gradientLabel(uint8 idx) internal pure returns (string memory) {
         string[7] memory labels =
-            ["None", "Linear", "Reflected", "Angled", "Double Angled", "Linear Double", "Linear Z"];
+            ["None", "Linear", "Double Linear", "Reflected", "Double Angled", "Angled", "Linear Z"];
         return labels[idx];
     }
 
@@ -92,7 +92,9 @@ library DotsArt {
     {
         uint256 h = uint256(keccak256(abi.encode(seed, "traits")));
         colorBandIdx = uint8(h % 7);
-        gradientIdx = uint8((h >> 16) % 7);
+        // A band width of 1 (colorBandIdx == 6) means every glyph is the
+        // same colour — gradient is meaningless, so force it to None (0).
+        gradientIdx = colorBandIdx == 6 ? 0 : uint8((h >> 16) % 7);
         direction = uint8((h >> 32) & 1);
         speed = uint8(1 << ((h >> 48) % 3)); // 1, 2, or 4
     }
@@ -164,7 +166,7 @@ library DotsArt {
                 ++visibleIdx;
             }
         }
-        return string.concat(SVG_OPEN, SVG_BG, SVG_GRID, _defs(), cells, SVG_CLOSE);
+        return string.concat(SVG_OPEN, SVG_BG, SVG_GRID, _defs(), '<g clip-path="url(#canvas-clip)">', cells, '</g>', SVG_CLOSE);
     }
 
     function _renderBlocks(IDots.Dot memory c) private pure returns (string memory) {
@@ -206,14 +208,14 @@ library DotsArt {
             }
         }
 
-        return string.concat(SVG_OPEN, SVG_BG, SVG_GRID, _defs(), cells, SVG_CLOSE);
+        return string.concat(SVG_OPEN, SVG_BG, SVG_GRID, _defs(), '<g clip-path="url(#canvas-clip)">', cells, '</g>', SVG_CLOSE);
     }
 
     function _renderMega(IDots.Dot memory c) private pure returns (string memory) {
         uint256 x = (CANVAS_W - BLOCK_GLYPH) / 2;
         uint256 y = (CANVAS_H - BLOCK_GLYPH) / 2;
         string memory mark = _glyph(x, y, BLOCK_GLYPH, _hexColor(c, 0));
-        return string.concat(SVG_OPEN, SVG_BG, SVG_GRID, _defs(), mark, SVG_CLOSE);
+        return string.concat(SVG_OPEN, SVG_BG, SVG_GRID, _defs(), '<g clip-path="url(#canvas-clip)">', mark, '</g>', SVG_CLOSE);
     }
 
     function _renderMegaDot() private pure returns (string memory) {
@@ -233,7 +235,7 @@ library DotsArt {
             '" height="', Strings.toString(BLOCK_GLYPH),
             '"/>'
         );
-        return string.concat(SVG_OPEN, SVG_BG, SVG_GRID, _defs(), mark, SVG_CLOSE);
+        return string.concat(SVG_OPEN, SVG_BG, SVG_GRID, _defs(), '<g clip-path="url(#canvas-clip)">', mark, '</g>', SVG_CLOSE);
     }
 
     // -----------------------------------------------------------------------
@@ -241,7 +243,11 @@ library DotsArt {
     // -----------------------------------------------------------------------
 
     function _defs() private pure returns (string memory) {
-        return string.concat("<defs>", SYMBOL_M_DARK, "</defs>");
+        return string.concat(
+            "<defs>", SYMBOL_M_DARK,
+            '<clipPath id="canvas-clip"><rect width="680" height="840"/></clipPath>',
+            "</defs>"
+        );
     }
 
     function _glyph(uint256 x, uint256 y, uint256 size, string memory hexColor)

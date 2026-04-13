@@ -4,7 +4,7 @@ import { CONTRACT_ADDRESS, ABI, hasContract } from '../config/contract';
 import type { LiveToken, HydratedToken } from '../lib/tokenUtils';
 
 const COLOR_BAND_LABELS = ['Eighty', 'Sixty', 'Forty', 'Twenty', 'Ten', 'Five', 'One'];
-const GRADIENT_LABELS = ['None', 'Linear', 'Reflected', 'Angled', 'Double Angled', 'Linear Double', 'Linear Z'];
+const GRADIENT_LABELS = ['None', 'Linear', 'Double Linear', 'Reflected', 'Double Angled', 'Angled', 'Linear Z'];
 
 /**
  * For each LiveToken, lazily fetch its tokenURI and parse the base64 JSON
@@ -50,8 +50,12 @@ export function useGalleryHydration(tokens: LiveToken[]): HydratedToken[] {
               if (attr.trait_type === 'Color Band' && cbIdx !== -1) colorBandIdx = cbIdx;
               const gIdx = GRADIENT_LABELS.indexOf(attr.value);
               if (attr.trait_type === 'Gradient' && gIdx !== -1) gradientIdx = gIdx;
-              if (attr.trait_type === 'Direction') direction = attr.value === 'Reverse' ? 1 : 0;
-              if (attr.trait_type === 'Speed') speed = Number(attr.value);
+              if (attr.trait_type === 'Shift') direction = attr.value === 'UV' ? 1 : 0;
+              if (attr.trait_type === 'Direction') direction = attr.value === 'Reverse' ? 1 : 0; // legacy
+              if (attr.trait_type === 'Speed') {
+                const sv = attr.value;
+                speed = sv === '2x' ? 1 : sv === '1x' ? 2 : sv === '0.5x' ? 4 : Number(sv);
+              }
             }
           }
         }

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 500" width="1500" height="500">
+  <defs>
+    <symbol id="bunny" viewBox="0 0 48 48">
+      <circle cx="18" cy="28.978" r="2"/>
+      <circle cx="30" cy="28.978" r="2"/>
+      <path d="M32.974,20.864C34.809,19.36,36,16.462,36,12.978c0-5.131-2.58-9-6-9s-6,3.869-6,9c0,1.903,0.356,3.631,0.977,5.054c-0.325-0.021-0.647-0.054-0.977-0.054s-0.652,0.033-0.977,0.054C23.644,16.609,24,14.881,24,12.978c0-5.131-2.58-9-6-9s-6,3.869-6,9c0,3.484,1.191,6.383,3.026,7.886C10.752,23.834,8,28.626,8,32.978c0,6.683,6.28,11,16,11s16-4.317,16-11C40,28.626,37.248,23.834,32.974,20.864z M30,7.978c0.581,0,2,1.752,2,5s-1.419,5-2,5s-2-1.752-2-5S29.419,7.978,30,7.978z M18,7.978c0.581,0,2,1.752,2,5s-1.419,5-2,5s-2-1.752-2-5S17.419,7.978,18,7.978z M26,39.9v-3.922h2v-4h-8v4h2V39.9c-5.14-0.391-10-2.353-10-6.922c0-4.982,5.353-11,12-11s12,6.018,12,11C36,37.547,31.14,39.509,26,39.9z"/>
+    </symbol>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1500" height="500" fill="#0a0a14"/>
+
+  <!-- Left section: Text branding (0-420px) -->
+  <text x="60" y="190" font-family="Inter, sans-serif" font-weight="700" font-size="80" fill="#ffffff" letter-spacing="6">DOTS</text>
+  <text x="60" y="240" font-family="JetBrains Mono, monospace" font-weight="400" font-size="16" fill="#8b8b93" letter-spacing="3">ONCHAIN GENERATIVE NFT</text>
+  <text x="60" y="280" font-family="JetBrains Mono, monospace" font-weight="400" font-size="13" fill="#555" letter-spacing="2">80 → 40 → 20 → 10 → 5 → 4 → 1 → MEGA DOT</text>
+
+  <!-- Divider line -->
+  <line x1="420" y1="60" x2="420" y2="440" stroke="#1e1e2a" stroke-width="1"/>
+
+  <!-- Right section: Dot grid (440-1500px) -->
+  <!-- Row 1 -->
+  <circle cx="510" cy="110" r="38" fill="#E84AA9"/><use href="#bunny" x="474" y="74" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="610" cy="110" r="38" fill="#FCDE5B"/><use href="#bunny" x="574" y="74" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="710" cy="110" r="38" fill="#94E337"/><use href="#bunny" x="674" y="74" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="810" cy="110" r="38" fill="#60B1F4"/><use href="#bunny" x="774" y="74" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="910" cy="110" r="38" fill="#DA3321"/><use href="#bunny" x="874" y="74" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="1010" cy="110" r="38" fill="#3B088C"/><use href="#bunny" x="974" y="74" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="1110" cy="110" r="38" fill="#45B2D3"/><use href="#bunny" x="1074" y="74" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="1210" cy="110" r="38" fill="#F2A93C"/><use href="#bunny" x="1174" y="74" width="72" height="72" fill="#0a0a14"/>
+
+  <!-- Row 2 -->
+  <circle cx="510" cy="210" r="38" fill="#B5F13B"/><use href="#bunny" x="474" y="174" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="610" cy="210" r="38" fill="#ED7C30"/><use href="#bunny" x="574" y="174" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="710" cy="210" r="38" fill="#FA5B67"/><use href="#bunny" x="674" y="174" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="810" cy="210" r="38" fill="#3263D0"/><use href="#bunny" x="774" y="174" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="910" cy="210" r="38" fill="#2E9D9A"/><use href="#bunny" x="874" y="174" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="1010" cy="210" r="38" fill="#FCDE5B"/><use href="#bunny" x="974" y="174" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="1110" cy="210" r="38" fill="#E84AA9"/><use href="#bunny" x="1074" y="174" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="1210" cy="210" r="38" fill="#94E337"/><use href="#bunny" x="1174" y="174" width="72" height="72" fill="#0a0a14"/>
+
+  <!-- Row 3 -->
+  <circle cx="510" cy="310" r="38" fill="#60B1F4"/><use href="#bunny" x="474" y="274" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="610" cy="310" r="38" fill="#DA3321"/><use href="#bunny" x="574" y="274" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="710" cy="310" r="38" fill="#3B088C"/><use href="#bunny" x="674" y="274" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="810" cy="310" r="38" fill="#45B2D3"/><use href="#bunny" x="774" y="274" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="910" cy="310" r="38" fill="#F2A93C"/><use href="#bunny" x="874" y="274" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="1010" cy="310" r="38" fill="#B5F13B"/><use href="#bunny" x="974" y="274" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="1110" cy="310" r="38" fill="#ED7C30"/><use href="#bunny" x="1074" y="274" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="1210" cy="310" r="38" fill="#FA5B67"/><use href="#bunny" x="1174" y="274" width="72" height="72" fill="#0a0a14"/>
+
+  <!-- Row 4 -->
+  <circle cx="510" cy="410" r="38" fill="#3263D0"/><use href="#bunny" x="474" y="374" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="610" cy="410" r="38" fill="#2E9D9A"/><use href="#bunny" x="574" y="374" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="710" cy="410" r="38" fill="#FCDE5B"/><use href="#bunny" x="674" y="374" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="810" cy="410" r="38" fill="#E84AA9"/><use href="#bunny" x="774" y="374" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="910" cy="410" r="38" fill="#94E337"/><use href="#bunny" x="874" y="374" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="1010" cy="410" r="38" fill="#60B1F4"/><use href="#bunny" x="974" y="374" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="1110" cy="410" r="38" fill="#DA3321"/><use href="#bunny" x="1074" y="374" width="72" height="72" fill="#0a0a14"/>
+  <circle cx="1210" cy="410" r="38" fill="#3B088C"/><use href="#bunny" x="1174" y="374" width="72" height="72" fill="#0a0a14"/>
+
+  <!-- Mega Dot on far right -->
+  <circle cx="1380" cy="250" r="70" fill="#DFD9D9"/>
+  <use href="#bunny" x="1325" y="195" width="110" height="110" fill="#19191A"/>
+</svg>
